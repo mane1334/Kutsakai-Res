@@ -1,5 +1,4 @@
 const { Pool } = require('pg');
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 require('dotenv').config();
 
@@ -29,6 +28,8 @@ const initPostgreSQL = () => {
 // Função para inicializar SQLite
 const initSQLite = () => {
   try {
+    // Load SQLite only when the application is configured to use SQLite.
+    const sqlite3 = require('sqlite3').verbose();
     const dbPath = path.join(__dirname, 'database.sqlite');
     sqliteDb = new sqlite3.Database(dbPath);
     console.log('✅ SQLite inicializado');
