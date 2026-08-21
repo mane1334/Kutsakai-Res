@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#00513b",
+                    "background": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "on-primary-container": "#8bd6b7",
+                    "surface-bright": "#f8f9ff",
+                    "surface-container-low": "#eff4ff",
+                    "surface-container": "#e5eeff",
+                    "inverse-primary": "#8bd6b6",
+                    "surface-container-high": "#dce9ff",
+                    "tertiary": "#2f3d51",
+                    "tertiary-container": "#465469",
+                    "on-tertiary-fixed-variant": "#3a485c",
+                    "primary-fixed-dim": "#8bd6b6",
+                    "primary-fixed": "#a6f2d1",
+                    "on-tertiary": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "outline-variant": "#bec9c2",
+                    "surface-variant": "#d3e4fe",
+                    "on-primary-fixed": "#002116",
+                    "primary": "#004532",
+                    "on-secondary-fixed": "#131b2e",
+                    "secondary-fixed": "#dae2fd",
+                    "on-tertiary-container": "#bac8e1",
+                    "secondary-container": "#dae2fd",
+                    "surface-dim": "#cbdbf5",
+                    "surface": "#f8f9ff",
+                    "secondary": "#565e74",
+                    "on-surface": "#0b1c30",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#1b6b51",
+                    "tertiary-fixed-dim": "#b9c7e0",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#065f46",
+                    "tertiary-fixed": "#d5e3fd",
+                    "on-tertiary-fixed": "#0d1c2f",
+                    "inverse-on-surface": "#eaf1ff",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-secondary-container": "#5c647a",
+                    "on-surface-variant": "#3f4944",
+                    "on-background": "#0b1c30",
+                    "error": "#ba1a1a",
+                    "outline": "#6f7973",
+                    "surface-container-highest": "#d3e4fe"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "xl": "32px",
+                    "container-max": "1440px",
+                    "base": "4px",
+                    "md": "16px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "sm": "8px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "h3": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "h1": ["Inter"],
+                    "body-md": ["Inter"],
+                    "h1-mobile": ["Inter"],
+                    "label-md": ["Inter"],
+                    "h2": ["Inter"]
+            },
+            "fontSize": {
+                    "h3": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "h1": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "h1-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md">
+<!-- Top Navigation Anchor -->
+<header class="sticky top-0 z-40 bg-surface/80 backdrop-blur-md px-md py-sm flex flex-col gap-sm">
+<div class="flex items-center justify-between">
+<h1 class="font-h2 text-h2 font-black text-primary">Sabor &amp; Arte</h1>
+<button class="flex items-center gap-xs bg-primary text-on-primary px-sm py-xs rounded-full shadow-sm hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications_active">notifications_active</span>
+<span class="font-label-md text-label-md">Chamar Garçom</span>
+</button>
+</div>
+<!-- Search Bar -->
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-2 pl-10 pr-4 text-body-md focus:ring-2 focus:ring-primary/20 placeholder:text-outline-variant" placeholder="O que você quer comer hoje?" type="text"/>
+</div>
+</header>
+<main class="pb-24">
+<!-- Categories Carousel -->
+<section class="mt-md">
+<div class="flex overflow-x-auto no-scrollbar gap-sm px-md">
+<button class="flex-shrink-0 flex items-center gap-xs bg-primary text-on-primary px-md py-2 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]" data-icon="restaurant_menu">restaurant_menu</span>
+                    Todos
+                </button>
+<button class="flex-shrink-0 flex items-center gap-xs bg-surface-container-lowest border border-outline-variant text-secondary px-md py-2 rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="tapas">tapas</span>
+                    Entradas
+                </button>
+<button class="flex-shrink-0 flex items-center gap-xs bg-surface-container-lowest border border-outline-variant text-secondary px-md py-2 rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="lunch_dining">lunch_dining</span>
+                    Burgers
+                </button>
+<button class="flex-shrink-0 flex items-center gap-xs bg-surface-container-lowest border border-outline-variant text-secondary px-md py-2 rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="local_pizza">local_pizza</span>
+                    Pizzas
+                </button>
+<button class="flex-shrink-0 flex items-center gap-xs bg-surface-container-lowest border border-outline-variant text-secondary px-md py-2 rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="local_bar">local_bar</span>
+                    Bebidas
+                </button>
+</div>
+</section>
+<!-- Product Grid -->
+<section class="px-md mt-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<h2 class="col-span-full font-h3 text-h3 text-on-surface">Mais Pedidos</h2>
+<!-- Item Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant hover:shadow-md transition-shadow group">
+<div class="relative h-48 w-full overflow-hidden">
+<img alt="Burger Gourmet" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A macro photography shot of a gourmet beef burger with melting cheddar cheese, fresh green lettuce, and caramelized onions on a toasted brioche bun. The lighting is warm and cinematic, highlighting the juicy textures of the meat and the crispness of the vegetables. The background is a soft-focus professional kitchen, creating a clean and appetizing modern restaurant aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv0bBF4zqsgwySMpLdPN7UPwCq1CNtZXjj1SYAR1k3nhqSFbnZA-4yIAH1AJ_nLsTYHXnRO19-1QptxQwdGU7pnrT6tmIfOOhg0YdWnt-4lx74IymeOlzIIcqt4uzLJdxdDXKLX4A-78YdoilgklKKe7vRQwKcsJWGV67ghNueedCL4qPgRzelPXWh7gfNHPafYXcSrIHDGk0OwtejR1501tEctQEe7IGju28BMET0x9tI2simIDz5fAe687X6xxTLep_WYp7ypIU"/>
+<div class="absolute top-2 left-2 flex gap-1">
+<span class="bg-primary-container text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="local_fire_department">local_fire_department</span> Popular
+                        </span>
+</div>
+</div>
+<div class="p-md flex flex-col gap-1">
+<div class="flex justify-between items-start">
+<h3 class="font-h3 text-h3 text-on-surface">Smash Bacon Deluxe</h3>
+<span class="text-primary font-bold">R$ 38,90</span>
+</div>
+<p class="text-secondary font-body-sm text-body-sm line-clamp-2">Blend de 160g, bacon crocante, queijo cheddar, maionese artesanal no pão brioche.</p>
+<div class="mt-md flex items-center justify-between">
+<div class="flex gap-2">
+<span class="text-[10px] uppercase tracking-wider font-bold text-error border border-error px-1.5 py-0.5 rounded">Picante</span>
+</div>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Item Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant hover:shadow-md transition-shadow group">
+<div class="relative h-48 w-full overflow-hidden">
+<img alt="Pizza Margherita" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Authentic Neapolitan pizza Margherita with a blistered charred crust, fresh molten mozzarella di bufala, vibrant tomato sauce, and bright green basil leaves. Shot from a high-angle top-down perspective on a rustic wooden board. The scene is bathed in natural, soft daylight, emphasizing the freshness of the ingredients and a clean, high-end culinary presentation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTtSU8hCFwh2REDRmdt3fvZ0LA8aDxIKumpeI2y9CUGJlKGAySErZL7KmkAxFt8WTS3J9lELMFzMfPqX2ES8EsMcjwD_xPAB5BflksNtWyGCR6w-cXVlLpLbpJSytZWdEgQbIDJu6omxjIMPwMRTe854rcaVheEsGEskSKB_XUD8XmwUiML53ypxaq2SbfzaAED0GhNiP137wNK9iK35Ixm2Am9CkgQ37su3R_P1LxNAB6tx-aOEZh7Gu0hwYMOlMpm8J3R_UJ-Ss"/>
+<div class="absolute top-2 left-2 flex gap-1">
+<span class="bg-on-primary-fixed-variant text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="eco">eco</span> Vegetariano
+                        </span>
+</div>
+</div>
+<div class="p-md flex flex-col gap-1">
+<div class="flex justify-between items-start">
+<h3 class="font-h3 text-h3 text-on-surface">Pizza Margherita</h3>
+<span class="text-primary font-bold">R$ 54,00</span>
+</div>
+<p class="text-secondary font-body-sm text-body-sm line-clamp-2">Molho de tomate italiano, muçarela de búfala, manjericão fresco e azeite extra virgem.</p>
+<div class="mt-md flex items-center justify-between">
+<div class="flex gap-2">
+<span class="text-[10px] uppercase tracking-wider font-bold text-on-primary-fixed-variant border border-on-primary-fixed-variant px-1.5 py-0.5 rounded">Clássico</span>
+</div>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Item Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant hover:shadow-md transition-shadow group">
+<div class="relative h-48 w-full overflow-hidden">
+<img alt="Drink Refresh" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A sophisticated sparkling pink cocktail served in a tall elegant glass with condensation on the outside. Garnished with a fresh sprig of mint and a slice of lime. The background is a trendy, dimly lit bar with soft bokeh lights in tones of gold and emerald. The image feels refreshing, modern, and high-end, using a professional editorial food photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTt387q-2BxEVjuR6J5vLsPJKSt0IH5o0ww-rQmim5HcHTzSRilyL9ZZJDlKvhv4MQkY5bnz75WRoMqUi0rkUXBWFxtvEZLbr-rXYvGOC8pTVBO2Nuy-bX7F68HdXqLPF3ii07kOeTSThsFQlDlO4_IJtbrptR1VTTyUW_gQVUlH7X0_vhWIZlJk7Qhp502iERAORLeMK2BJZ5YwkmGJg_qCFC10-KW0Qo81OpngmqEqCUx7HiHkRpVn9EvqIqp5BdQPchLnBLVEM"/>
+</div>
+<div class="p-md flex flex-col gap-1">
+<div class="flex justify-between items-start">
+<h3 class="font-h3 text-h3 text-on-surface">Soda Italiana Pink</h3>
+<span class="text-primary font-bold">R$ 16,00</span>
+</div>
+<p class="text-secondary font-body-sm text-body-sm line-clamp-2">Mistura refrescante de frutas vermelhas, água com gás e gelo cristalino.</p>
+<div class="mt-md flex items-center justify-between">
+<div class="flex gap-2">
+<span class="text-[10px] uppercase tracking-wider font-bold text-secondary border border-outline-variant px-1.5 py-0.5 rounded">Refrescante</span>
+</div>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface-container-lowest dark:bg-inverse-surface shadow-[0_-2px_10px_rgba(0,0,0,0.05)] rounded-t-xl">
+<!-- Cardápio (Active) -->
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim bg-primary-container/20 rounded-xl px-4 py-1 transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-label-md text-label-md">Cardápio</span>
+</a>
+<!-- Pedidos -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-md text-label-md">Pedidos</span>
+</a>
+<!-- Carrinho -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant transition-transform duration-200 active:scale-90 relative" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-label-md text-label-md">Carrinho</span>
+<span class="absolute -top-1 -right-1 bg-error text-on-error text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">2</span>
+</a>
+<!-- Perfil -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Perfil</span>
+</a>
+</nav>
+</body></html>

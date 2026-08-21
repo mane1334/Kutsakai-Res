@@ -1,0 +1,7 @@
+{
+  "name": "Interactive Restaurantes",
+  "description": "Client app for restaurant tablet tables featuring digital menu, AI waiter assistant, instant ordering, table service calls, order status tracking, themes, and kiosk mode.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

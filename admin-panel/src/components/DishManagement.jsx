@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import DishForm from './DishForm.jsx';
 import DishTable from './DishTable.jsx';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+import { createDish, deleteDish, getDishes, updateDish } from '../services/api';
 
 const DishManagement = () => {
   const [dishes, setDishes] = useState([]);
@@ -18,14 +17,10 @@ const DishManagement = () => {
 
   const fetchDishes = async () => {
     try {
-      const response = await fetch(`${API_URL}/dishes`);
-      if (!response.ok) {
-        throw new Error('Erro ao buscar pratos.');
-      }
-      const data = await response.json();
+      const data = await getDishes();
       setDishes(data);
     } catch (err) {
-      setError(err.message);
+      setError(err?.response?.data?.error || err.message || 'Erro ao buscar pratos.');
     } finally {
       setLoading(false);
     }
@@ -35,29 +30,13 @@ const DishManagement = () => {
     setLoading(true);
     setActionError(null);
     try {
-      let response;
       if (dishData.id) {
-        // Update existing dish
-        response = await fetch(`${API_URL}/dishes/${dishData.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dishData),
-        });
+        await updateDish(dishData.id, dishData);
       } else {
-        // Add new dish
-        response = await fetch(`${API_URL}/dishes`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dishData),
-        });
+        await createDish(dishData);
       }
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Erro ao salvar prato.' }));
-        throw new Error(errorData.message);
-      }
-      await response.json();
-      fetchDishes(); // Refresh the list
+      fetchDishes();
       setIsFormVisible(false);
       setEditingDish(null);
     } catch (err) {
@@ -69,24 +48,18 @@ const DishManagement = () => {
   };
 
   const handleDeleteDish = async (id) => {
-    if (window.confirm('Tem certeza que deseja deletar este prato?')) {
-      setLoading(true);
-      setActionError(null);
-      try {
-        const response = await fetch(`${API_URL}/dishes/${id}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Erro ao deletar prato.' }));
-          throw new Error(errorData.message);
-        }
-        fetchDishes(); // Refresh the list
-      } catch (err) {
-        setActionError(err.message);
-        setTimeout(() => setActionError(null), 5000);
-      } finally {
-        setLoading(false);
-      }
+    if (!window.confirm('Tem certeza que deseja deletar este prato?')) return;
+
+    setLoading(true);
+    setActionError(null);
+    try {
+      await deleteDish(id);
+      fetchDishes();
+    } catch (err) {
+      setActionError(err.message);
+      setTimeout(() => setActionError(null), 5000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,41 +78,51 @@ const DishManagement = () => {
     setEditingDish(null);
   };
 
-  if (loading) return <div className="text-center p-8">Carregando pratos...</div>;
-  if (error) return <div className="text-center text-red-500 p-8">Erro: {error}</div>;
+  if (loading) return <div className="admin-card border-dashed p-8 text-center text-ink-soft">Carregando pratos...</div>;
+  if (error) return <div className="rounded-lg border border-rose-200 bg-rose-50 p-8 text-center text-rose-700">Erro: {error}</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Gestão de Cardápio</h1>
-      <button
-        onClick={handleAddDish}
-        className="bg-green-500 text-white px-4 py-2 rounded mb-4"
-      >
-        Adicionar Novo Prato
-      </button>
+    <div className="space-y-6">
+      <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="admin-kicker">Cardapio</p>
+            <h1 className="admin-page-title mt-2">Gerencie pratos e disponibilidade</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft">
+              Atualize o cardápio com mais clareza visual, controle categorias e mantenha os pratos prontos para venda.
+            </p>
+          </div>
 
-      {actionError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-          <span className="block sm:inline">{actionError}</span>
+          <button
+            onClick={handleAddDish}
+            className="admin-primary-btn"
+          >
+            Adicionar novo prato
+          </button>
         </div>
-      )}
+      </section>
 
-      {isFormVisible && (
-        <DishForm
-          dish={editingDish}
-          onSave={handleSaveDish}
-          onCancel={handleCancelForm}
-        />
-      )}
+      {actionError ? (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700">{actionError}</div>
+      ) : null}
 
-      <DishTable
-        dishes={dishes}
-        onEdit={handleEditDish}
-        onDelete={handleDeleteDish}
-      />
+      {isFormVisible ? (
+        <DishForm dish={editingDish} onSave={handleSaveDish} onCancel={handleCancelForm} />
+      ) : null}
+
+      <section className="admin-card p-6">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="admin-kicker">Lista</p>
+            <h2 className="mt-2 text-2xl font-black text-ink">Pratos cadastrados</h2>
+          </div>
+          <span className="rounded-lg bg-surface-low px-4 py-2 text-sm font-bold text-emeraldpro">{dishes.length} pratos</span>
+        </div>
+
+        <DishTable dishes={dishes} onEdit={handleEditDish} onDelete={handleDeleteDish} />
+      </section>
     </div>
   );
 };
 
 export default DishManagement;
-

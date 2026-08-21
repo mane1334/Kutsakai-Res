@@ -9,6 +9,7 @@ interface ToastProps {
 }
 
 const { width } = Dimensions.get('window');
+const isWideScreen = width >= 1000;
 
 const Toast: React.FC<ToastProps> = ({ visible, message, type = 'info', onHide }) => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -74,10 +75,10 @@ const Toast: React.FC<ToastProps> = ({ visible, message, type = 'info', onHide }
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        top: 20,
+        top: isWideScreen ? 84 : 20,
         alignSelf: 'center',
         paddingVertical: 12,
-        paddingHorizontal: 24,
+        paddingHorizontal: 22,
         borderRadius: 25,
         zIndex: 9999,
         shadowColor: '#000',
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 10,
-        maxWidth: width * 0.8,
+        maxWidth: isWideScreen ? 320 : width * 0.8,
     },
     text: {
         color: '#fff',

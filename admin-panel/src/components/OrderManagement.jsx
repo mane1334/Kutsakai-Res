@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { subscribeToEvent } from '../services/socket';
 import { formatMeticalDisplay } from '../utils/currency';
+import { getOrders, updateOrderPrepTime, updateOrderStatus } from '../services/api';
 
 const _HOSTNAME = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : 'localhost';
 const _PROTOCOL = (typeof window !== 'undefined' && window.location && window.location.protocol) ? window.location.protocol : 'http:';
-const API_URL = import.meta.env.VITE_API_URL || `${_PROTOCOL}//${_HOSTNAME}:3000/api`;
 const WS_URL = import.meta.env.VITE_WS_URL || `${_PROTOCOL === 'https:' ? 'wss' : 'ws'}://${_HOSTNAME}:3000`;
 
 const getItemUnitPrice = (item) => {
@@ -28,6 +28,13 @@ const statusLabel = (s) => ({
   completed: 'Concluído',
   cancelled: 'Cancelado',
 }[s] || s);
+
+const statusStyles = {
+  pending: 'bg-amber-100 text-amber-800 border-amber-200',
+  preparing: 'bg-blue-100 text-blue-800 border-blue-200',
+  completed: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  cancelled: 'bg-red-100 text-red-800 border-red-200',
+};
 
 const readPersistedStatuses = () => {
   try {
@@ -64,15 +71,11 @@ const OrderManagement = () => {
   const fetchOrders = async (status) => {
     setLoading(true);
     try {
-      const url = status && status !== 'all' ? `${API_URL}/orders?status=${status}` : `${API_URL}/orders`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Erro ao buscar pedidos.');
-      }
-      const data = await response.json();
+      const data = await getOrders(status && status !== 'all' ? { status } : {});
       setOrders(data.orders);
+      setError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err?.response?.data?.error || err.message || 'Erro ao buscar pedidos.');
     } finally {
       setLoading(false);
     }
@@ -105,14 +108,7 @@ const OrderManagement = () => {
 
   const handleStatusChange = async (orderId, newStatus, reason = null) => {
     try {
-      const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus, cancellation_reason: reason }),
-      });
-      if (!response.ok) {
-        throw new Error('Erro ao atualizar status do pedido.');
-      }
+      await updateOrderStatus(orderId, newStatus, reason);
       // Atualiza a lista imediatamente após o sucesso
       setActionMessage(`Pedido #${orderId} atualizado para "${newStatus}".`);
       // persist admin-side completed state to avoid showing prep timers after refresh
@@ -168,12 +164,7 @@ const OrderManagement = () => {
       const body = {};
       if (typeof setMinutes === 'number') body.set_minutes = setMinutes;
       if (typeof addMinutes === 'number') body.add_minutes = addMinutes;
-      const res = await fetch(`${API_URL}/orders/${orderId}/prep-time`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error('Erro ao ajustar tempo de preparo.');
+      await updateOrderPrepTime(orderId, body);
       setActionMessage(`Tempo de preparo atualizado para o pedido #${orderId}.`);
       setTimeout(() => setActionMessage(null), 3000);
       fetchOrders(filterStatus);
@@ -188,177 +179,224 @@ const OrderManagement = () => {
   if (loading) return <div className="text-center p-8">Carregando pedidos...</div>;
   if (error) return <div className="text-center text-red-500 p-8">Erro: {error}</div>;
 
+  const groupedOrders = orders.reduce((acc, order) => {
+    const d = new Date(order.created_at);
+    const dateKey = d.toISOString().split('T')[0];
+    if (!acc[dateKey]) {
+      const today = new Date().toISOString().split('T')[0];
+      const label = dateKey === today ? 'Hoje' : d.toLocaleDateString('pt-MZ', { day: '2-digit', month: 'long', year: 'numeric' });
+      acc[dateKey] = { label, items: [] };
+    }
+    acc[dateKey].items.push(order);
+    return acc;
+  }, {});
+
+  const sortedDates = Object.keys(groupedOrders).sort((a, b) => new Date(b) - new Date(a));
+  const pendingCount = orders.filter((order) => order.status === 'pending').length;
+  const preparingCount = orders.filter((order) => order.status === 'preparing').length;
+  const completedCount = orders.filter((order) => order.status === 'completed').length;
+  const averagePrepMinutes = orders.length
+    ? Math.round(orders.reduce((sum, order) => sum + (Number(order.prep_time_seconds) || 0), 0) / orders.length / 60)
+    : 0;
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border-b border-gray-200">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gestão de Pedidos em Tempo Real</h1>
-            <p className="text-gray-600 mt-1">Acompanhe e gerencie todos os pedidos do restaurante</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700">Filtrar por Status:</label>
-              <select
-                id="statusFilter"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-              >
-                <option value="pending">Aguardando</option>
-                <option value="preparing">Em Preparo</option>
-                <option value="completed">Concluído</option>
-                <option value="cancelled">Cancelado</option>
-                <option value="all">Todos</option>
-              </select>
-            </div>
-            {actionMessage && (
-              <div className="px-3 py-1 bg-green-100 text-green-700 rounded-md text-sm">
-                {actionMessage}
-              </div>
-            )}
-          </div>
+      <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="admin-kicker">Pedidos atuais</p>
+          <h1 className="admin-page-title mt-2">Fila de producao em tempo real</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
+            Gerencie mesa, status, itens e tempo de preparo com a densidade operacional do novo design.
+          </p>
         </div>
-      </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {actionMessage ? (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
+              {actionMessage}
+            </div>
+          ) : null}
+          <div className="rounded-xl bg-surface-low p-1">
+            {[
+              ['all', 'Todos'],
+              ['pending', 'Pendentes'],
+              ['preparing', 'Preparando'],
+              ['completed', 'Concluidos'],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setFilterStatus(value)}
+                className={`rounded-lg px-3 py-2 text-sm font-bold transition ${
+                  filterStatus === value ? 'bg-white text-emeraldpro shadow-sm' : 'text-ink-soft hover:bg-white/60'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <select
+            id="statusFilter"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="rounded-lg border border-[#e7c8c2] bg-white px-3 py-2 text-sm font-semibold text-ink outline-none focus:border-emeraldpro focus:ring-2 focus:ring-emeraldpro/10"
+          >
+            <option value="pending">Aguardando</option>
+            <option value="preparing">Em Preparo</option>
+            <option value="completed">Concluido</option>
+            <option value="cancelled">Cancelado</option>
+            <option value="all">Todos</option>
+          </select>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="admin-card p-5">
+          <p className="admin-kicker">Fila de espera</p>
+          <p className="mt-2 text-2xl font-black text-emeraldpro">{pendingCount} pedidos</p>
+          <p className="mt-1 text-sm text-ink-soft">Aguardando confirmacao</p>
+        </div>
+        <div className="admin-card p-5">
+          <p className="admin-kicker">Em preparo</p>
+          <p className="mt-2 text-2xl font-black text-ink">{preparingCount} pedidos</p>
+          <p className="mt-1 text-sm text-ink-soft">Cozinha em producao</p>
+        </div>
+        <div className="admin-card p-5">
+          <p className="admin-kicker">Tempo medio</p>
+          <p className="mt-2 text-2xl font-black text-ink">{averagePrepMinutes} min</p>
+          <p className="mt-1 text-sm text-ink-soft">Baseado na lista atual</p>
+        </div>
+        <div className="admin-card p-5">
+          <p className="admin-kicker">Concluidos</p>
+          <p className="mt-2 text-2xl font-black text-emeraldpro">{completedCount}</p>
+          <p className="mt-1 text-sm text-ink-soft">Pedidos finalizados</p>
+        </div>
+      </section>
 
       {orders.length === 0 ? (
-        <div className="bg-white p-12 rounded-lg shadow-sm text-center">
-          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="admin-card border-dashed bg-white p-12 text-center">
+          <svg className="mx-auto mb-4 h-16 w-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum pedido encontrado</h3>
-          <p className="text-gray-500">Não há pedidos com o status "{statusLabel(filterStatus)}" no momento.</p>
+          <h3 className="mb-2 text-lg font-bold text-ink">Nenhum pedido encontrado</h3>
+          <p className="text-ink-soft">Nao ha pedidos com o status "{statusLabel(filterStatus)}" no momento.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {orders.map(order => (
-            <div key={order.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h2 className="text-lg font-bold text-gray-900">Pedido #{order.id}</h2>
-                  <p className="text-sm text-gray-600">Mesa {order.table_number}</p>
-                </div>
-                <div className="text-right">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    order.status === 'preparing' ? 'bg-blue-100 text-blue-800' :
-                      order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
-                    }`}>
-                    {statusLabel(order.status)}
-                  </span>
-                </div>
+        <div className="space-y-8">
+          {sortedDates.map(dateKey => (
+            <div key={dateKey} className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[#e7c8c2] pb-2">
+                <h2 className="text-lg font-black text-ink">{groupedOrders[dateKey].label}</h2>
+                <span className="text-sm font-semibold text-ink-soft">{groupedOrders[dateKey].items.length} pedidos</span>
               </div>
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Total:</span>
-                  <span className="font-semibold text-gray-900">{formatMeticalDisplay(computeOrderTotal(order))}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Hora:</span>
-                  <span className="text-gray-900">{new Date(order.created_at).toLocaleTimeString('pt-MZ')}</span>
-                </div>
-              </div>
-              {typeof order.prep_time_seconds === 'number' && (order.status === 'pending' || order.status === 'preparing') && !(persisted && String(persisted[order.id]) === 'completed') && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-700">Tempo de Preparo:</span>
-                    <span className="text-lg font-bold text-gray-900">{Math.ceil(order.prep_time_seconds / 60)} min</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <button onClick={() => adjustPrepTime(order.id, { addMinutes: 5 })} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">+5 min</button>
-                      <button onClick={() => adjustPrepTime(order.id, { addMinutes: 10 })} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">+10 min</button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Minutos"
-                        value={editingPrep[order.id] ?? ''}
-                        onChange={(e) => setEditingPrep(prev => ({ ...prev, [order.id]: e.target.value }))}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                      <button
-                        onClick={() => {
-                          const val = parseFloat(editingPrep[order.id]);
-                          if (!isNaN(val)) adjustPrepTime(order.id, { setMinutes: val });
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                      >Definir</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Itens do Pedido:</h3>
-                <div className="space-y-2">
-                  {getOrderItems(order).map((item, idx) => {
-                    const unit = getItemUnitPrice(item);
-                    const qty = Number(item?.quantity ?? 1) || 1;
-                    const subtotal = unit * qty;
-                    return (
-                      <div key={idx} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-md">
-                        <div className="flex-1">
-                          <span className="text-sm font-medium text-gray-900">{item.name}</span>
-                          <span className="text-sm text-gray-500 ml-2">x{qty}</span>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {groupedOrders[dateKey].items.map(order => (
+                  <div key={order.id} className="admin-card overflow-hidden transition hover:shadow-admin-soft">
+                    <div className="border-b border-[#e7c8c2] bg-white p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="admin-kicker">Mesa {order.table_number}</p>
+                          <h2 className="mt-1 text-xl font-black text-ink">Pedido #{order.id}</h2>
+                          <p className="mt-1 text-sm text-ink-soft">{new Date(order.created_at).toLocaleTimeString('pt-MZ')}</p>
                         </div>
-                        <span className="text-sm font-semibold text-gray-900">{formatMeticalDisplay(subtotal)}</span>
+                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${statusStyles[order.status] || 'border-slate-200 bg-slate-100 text-slate-700'}`}>
+                          {statusLabel(order.status)}
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
-                {order.status === 'pending' && (
-                  <>
-                    <button
-                      onClick={() => handleStatusChange(order.id, 'preparing')}
-                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Em Preparo
-                    </button>
-                    <button
-                      onClick={() => handleCancelOrder(order.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Cancelar
-                    </button>
-                  </>
-                )}
-                {order.status === 'preparing' && (
-                  <>
-                    <button
-                      onClick={() => handleCompleteOrder(order.id)}
-                      className="bg-green-500 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Concluído
-                    </button>
-                    <button
-                      onClick={() => handleCancelOrder(order.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Cancelar
-                    </button>
-                  </>
-                )}
-                {order.status === 'completed' && (
-                  <>
-                    {undoableCompletions.has(order.id) ? (
-                      <button
-                        onClick={() => handleUndoComplete(order.id)}
-                        className="bg-orange-500 text-white px-3 py-1 rounded text-sm"
-                      >
-                        Desfazer (5s)
-                      </button>
-                    ) : (
-                      <span className="text-sm text-gray-500">Concluído</span>
-                    )}
-                  </>
-                )}
-                {order.status === 'cancelled' && (
-                  <span className="text-sm text-gray-500">Cancelado</span>
-                )}
+                    </div>
+
+                    <div className="space-y-4 p-5">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-lg bg-surface-low p-3">
+                          <p className="admin-kicker">Total</p>
+                          <p className="mt-1 text-lg font-black text-ink">{formatMeticalDisplay(computeOrderTotal(order))}</p>
+                        </div>
+                        <div className="rounded-lg bg-surface-low p-3">
+                          <p className="admin-kicker">Preparo</p>
+                          <p className="mt-1 text-lg font-black text-ink">{Math.ceil((Number(order.prep_time_seconds) || 0) / 60)} min</p>
+                        </div>
+                      </div>
+
+                      {typeof order.prep_time_seconds === 'number' && (order.status === 'pending' || order.status === 'preparing') && !(persisted && String(persisted[order.id]) === 'completed') ? (
+                        <div className="rounded-lg border border-[#e7c8c2] bg-white p-4">
+                          <div className="mb-3 flex items-center justify-between">
+                            <span className="text-sm font-bold text-ink">Tempo de preparo</span>
+                            <span className="text-lg font-black text-emeraldpro">{Math.ceil(order.prep_time_seconds / 60)} min</span>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <button onClick={() => adjustPrepTime(order.id, { addMinutes: 5 })} className="admin-secondary-btn flex-1 px-3 py-2 text-sm" type="button">+5 min</button>
+                              <button onClick={() => adjustPrepTime(order.id, { addMinutes: 10 })} className="admin-secondary-btn flex-1 px-3 py-2 text-sm" type="button">+10 min</button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                placeholder="Minutos"
+                                value={editingPrep[order.id] ?? ''}
+                                onChange={(e) => setEditingPrep(prev => ({ ...prev, [order.id]: e.target.value }))}
+                                className="min-w-0 flex-1 rounded-lg border border-[#e7c8c2] px-3 py-2 text-sm focus:border-emeraldpro focus:ring-2 focus:ring-emeraldpro/10"
+                              />
+                              <button
+                                onClick={() => {
+                                  const val = parseFloat(editingPrep[order.id]);
+                                  if (!isNaN(val)) adjustPrepTime(order.id, { setMinutes: val });
+                                }}
+                                className="admin-primary-btn px-4 py-2 text-sm"
+                                type="button"
+                              >
+                                Definir
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      <div>
+                        <h3 className="mb-2 text-sm font-black text-ink">Itens do pedido</h3>
+                        <div className="space-y-2">
+                          {getOrderItems(order).map((item, idx) => {
+                            const unit = getItemUnitPrice(item);
+                            const qty = Number(item?.quantity ?? 1) || 1;
+                            const subtotal = unit * qty;
+                            return (
+                              <div key={idx} className="flex items-center justify-between rounded-lg bg-surface-low px-3 py-2">
+                                <div className="min-w-0 flex-1">
+                                  <span className="truncate text-sm font-bold text-ink">{item.name}</span>
+                                  <span className="ml-2 text-sm text-ink-soft">x{qty}</span>
+                                </div>
+                                <span className="text-sm font-black text-ink">{formatMeticalDisplay(subtotal)}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 border-t border-[#e7c8c2] pt-4">
+                        {order.status === 'pending' ? (
+                          <>
+                            <button onClick={() => handleStatusChange(order.id, 'preparing')} className="admin-primary-btn px-3 py-2 text-sm" type="button">Em Preparo</button>
+                            <button onClick={() => handleCancelOrder(order.id)} className="rounded-lg bg-red-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-red-700" type="button">Cancelar</button>
+                          </>
+                        ) : null}
+                        {order.status === 'preparing' ? (
+                          <>
+                            <button onClick={() => handleCompleteOrder(order.id)} className="admin-primary-btn px-3 py-2 text-sm" type="button">Concluido</button>
+                            <button onClick={() => handleCancelOrder(order.id)} className="rounded-lg bg-red-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-red-700" type="button">Cancelar</button>
+                          </>
+                        ) : null}
+                        {order.status === 'completed' ? (
+                          undoableCompletions.has(order.id) ? (
+                            <button onClick={() => handleUndoComplete(order.id)} className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-amber-700" type="button">Desfazer (5s)</button>
+                          ) : (
+                            <span className="text-sm font-semibold text-ink-soft">Concluido</span>
+                          )
+                        ) : null}
+                        {order.status === 'cancelled' ? <span className="text-sm font-semibold text-ink-soft">Cancelado</span> : null}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
@@ -369,4 +407,3 @@ const OrderManagement = () => {
 };
 
 export default OrderManagement;
-

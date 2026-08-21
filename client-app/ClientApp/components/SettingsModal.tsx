@@ -1,34 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet, Alert, NativeModules } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { buildApiUrl, fetchWithTimeout, normalizeServerHost } from '../utils/network';
 
 interface SettingsModalProps {
     visible: boolean;
     onClose: () => void;
-    onSave: (ip: string, table: string, theme: string, language: string) => void;
+    onSave: (ip: string, vpsIp: string, table: string, restaurantId: string, theme: string, language: string) => void;
     initialIp: string;
+    initialVpsIp?: string;
     initialTable: string;
+    initialRestaurantId: string;
     currentTheme: string;
     currentLanguage: string;
 }
 
-import { themes } from '../themes';
-
-const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave, initialIp, initialTable, currentTheme, currentLanguage }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave, initialIp, initialVpsIp = '', initialTable, initialRestaurantId, currentTheme, currentLanguage }) => {
     const [tempIp, setTempIp] = useState(initialIp);
+    const [tempVpsIp, setTempVpsIp] = useState(initialVpsIp);
     const [tempTable, setTempTable] = useState(initialTable);
+    const [tempRestaurantId, setTempRestaurantId] = useState(initialRestaurantId);
     const [selectedTheme, setSelectedTheme] = useState(currentTheme);
     const [selectedLanguage, setSelectedLanguage] = useState(currentLanguage);
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState('');
+    const [testStatus, setTestStatus] = useState<{ type: 'idle' | 'loading' | 'success' | 'error'; message: string }>({
+        type: 'idle',
+        message: '',
+    });
 
     useEffect(() => {
         if (visible) {
             setTempIp(initialIp);
+            setTempVpsIp(initialVpsIp);
             setTempTable(initialTable);
+            setTempRestaurantId(initialRestaurantId);
             setSelectedTheme(currentTheme);
+            setSelectedLanguage(currentLanguage);
+            setTestStatus({ type: 'idle', message: '' });
         }
-    }, [visible, initialIp, initialTable, currentTheme]);
+    }, [visible, initialIp, initialVpsIp, initialTable, initialRestaurantId, currentTheme, currentLanguage]);
+
+    const normalizedHost = normalizeServerHost(tempIp);
+    const previewUrl = normalizedHost ? `${buildApiUrl(normalizedHost)}/health` : '';
 
     const scanNetwork = async () => {
         setIsScanning(true);
@@ -36,7 +50,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
         try {
             const state = await NetInfo.fetch();
             if (!state.isConnected || !state.details || !('ipAddress' in state.details)) {
-                throw new Error('Sem conexão Wi-Fi ativa.');
+                throw new Error('Sem conexao Wi-Fi ativa.');
             }
 
             const ip = (state.details as any).ipAddress;
@@ -46,13 +60,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
             const checkIp = async (i: number) => {
                 const target = `${subnet}.${i}`;
                 try {
-                    const controller = new AbortController();
-                    const id = setTimeout(() => controller.abort(), 500);
-
-                    const response = await fetch(`http://${target}:3000/api/health`, {
-                        signal: controller.signal
-                    });
-                    clearTimeout(id);
+                    const response = await fetchWithTimeout(`${buildApiUrl(target)}/health`, {}, 500);
 
                     if (response.ok) {
                         const data = await response.json();
@@ -71,10 +79,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
                     promises.push(checkIp(i));
                 }
                 const results = await Promise.all(promises);
-                const found = results.find(r => r !== null);
+                const found = results.find((r) => r !== null);
                 if (found) {
                     setTempIp(found);
-                    setScanProgress('Servidor encontrado!');
+                    setScanProgress('Servidor encontrado.');
                     setTimeout(() => {
                         setIsScanning(false);
                         setScanProgress('');
@@ -82,7 +90,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
                     return;
                 }
             }
-            setScanProgress('Servidor não encontrado na rede.');
+            setScanProgress('Servidor nao encontrado na rede.');
         } catch (err: any) {
             Alert.alert('Erro no Scan', err.message || 'Falha ao buscar rede.');
         } finally {
@@ -93,21 +101,47 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
         }
     };
 
+    const testConnection = async () => {
+        if (!normalizedHost) {
+            setTestStatus({ type: 'error', message: 'Digite um IP válido antes de testar.' });
+            return;
+        }
+
+        setTestStatus({ type: 'loading', message: 'Testando conexão...' });
+
+        try {
+            const response = await fetchWithTimeout(previewUrl, {}, 6000);
+            const data = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const statusText = data?.status ? `status: ${data.status}` : 'Resposta recebida';
+            setTestStatus({ type: 'success', message: `Conectado com sucesso (${statusText}).` });
+        } catch (error: any) {
+            setTestStatus({
+                type: 'error',
+                message: `Falha ao conectar: ${error?.message || 'erro desconhecido'}`,
+            });
+        }
+    };
+
     return (
         <Modal visible={visible} animationType="slide" transparent={true}>
             <View style={styles.lockOverlay}>
                 <View style={styles.container}>
-                    <Text style={styles.title}>Configurações</Text>
+                    <Text style={styles.title}>Configuracoes</Text>
 
                     <View style={styles.inputGroup}>
                         <View style={styles.labelRow}>
-                            <Text style={styles.label}>IP do Servidor:</Text>
+                            <Text style={styles.label}>IP do Servidor</Text>
                             <TouchableOpacity
                                 onPress={scanNetwork}
                                 disabled={isScanning}
                                 style={styles.scanButton}
                             >
-                                <Text style={styles.scanButtonText}>{isScanning ? '🔍 Buscando...' : '📡 Auto-Scan'}</Text>
+                                <Text style={styles.scanButtonText}>{isScanning ? 'Buscando...' : 'Auto-Scan'}</Text>
                             </TouchableOpacity>
                         </View>
                         <TextInput
@@ -123,10 +157,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
                         {scanProgress !== '' && (
                             <Text style={styles.progressText}>{scanProgress}</Text>
                         )}
+                        {previewUrl !== '' && (
+                            <Text style={styles.previewText}>URL de teste: {previewUrl}</Text>
+                        )}
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Número da Mesa:</Text>
+                        <Text style={styles.label}>IP do VPS (Fallback)</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={tempVpsIp}
+                            onChangeText={setTempVpsIp}
+                            placeholder="Ex: 104.248.55.120"
+                            placeholderTextColor="#94a3b8"
+                            autoCorrect={false}
+                            autoCapitalize="none"
+                            selectTextOnFocus={true}
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Numero da Mesa</Text>
                         <TextInput
                             style={styles.input}
                             value={tempTable}
@@ -137,38 +188,58 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Tema:</Text>
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                            {Object.entries(themes).map(([key, theme]) => (
+                        <Text style={styles.label}>ID do Restaurante (Tenant)</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={tempRestaurantId}
+                            onChangeText={setTempRestaurantId}
+                            keyboardType="numeric"
+                            selectTextOnFocus={true}
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Idioma</Text>
+                        <View style={styles.langRow}>
+                            {['pt', 'en'].map((lang) => (
                                 <TouchableOpacity
-                                    key={key}
+                                    key={lang}
                                     style={[
-                                        styles.themeButton,
-                                        { backgroundColor: theme.colors.primary },
-                                        selectedTheme === key && styles.themeButtonSelected
+                                        styles.langButton,
+                                        selectedLanguage === lang && styles.langButtonSelected
                                     ]}
-                                    onPress={() => setSelectedTheme(key)}
+                                    onPress={() => setSelectedLanguage(lang)}
                                 >
-                                    <Text style={[styles.themeButtonText, selectedTheme === key && { color: '#fff' }]}>{theme.name}</Text>
+                                    <Text style={[styles.langButtonText, selectedLanguage === lang && styles.langButtonTextSelected]}>
+                                        {lang === 'pt' ? 'Portugues' : 'English'}
+                                    </Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Idioma / Language:</Text>
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                            {['pt', 'en'].map((lang) => (
+                        <Text style={styles.label}>Tema Visual</Text>
+                        <View style={styles.langRow}>
+                            {[
+                                { id: 'light', name: 'Original' },
+                                { id: 'dark', name: 'Dark' },
+                                { id: 'luxury', name: 'Luxury' },
+                                { id: 'forest', name: 'Forest' },
+                                { id: 'ocean', name: 'Ocean' },
+                                { id: 'sunset', name: 'Sunset' }
+                            ].map((theme) => (
                                 <TouchableOpacity
-                                    key={lang}
+                                    key={theme.id}
                                     style={[
-                                        styles.themeButton,
-                                        { backgroundColor: '#475569' },
-                                        selectedLanguage === lang && styles.themeButtonSelected
+                                        styles.langButton,
+                                        selectedTheme === theme.id && styles.langButtonSelected
                                     ]}
-                                    onPress={() => setSelectedLanguage(lang)}
+                                    onPress={() => setSelectedTheme(theme.id)}
                                 >
-                                    <Text style={[styles.themeButtonText, selectedLanguage === lang && { color: '#fff' }]}>{lang === 'pt' ? '🇵🇹 Português' : '🇺🇸 English'}</Text>
+                                    <Text style={[styles.langButtonText, selectedTheme === theme.id && styles.langButtonTextSelected]}>
+                                        {theme.name}
+                                    </Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -176,10 +247,29 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
 
                     <TouchableOpacity
                         style={styles.saveButton}
-                        onPress={() => onSave(tempIp.trim(), tempTable.trim(), selectedTheme, selectedLanguage)}
+                        onPress={() => onSave(normalizeServerHost(tempIp), normalizeServerHost(tempVpsIp), tempTable.trim(), tempRestaurantId.trim(), selectedTheme, selectedLanguage)}
                     >
                         <Text style={styles.saveButtonText}>Salvar e Conectar</Text>
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.testButton}
+                        onPress={testConnection}
+                    >
+                        <Text style={styles.testButtonText}>Testar Conexão</Text>
+                    </TouchableOpacity>
+
+                    {testStatus.type !== 'idle' && (
+                        <Text
+                            style={[
+                                styles.testStatusText,
+                                testStatus.type === 'success' ? styles.testStatusSuccess : null,
+                                testStatus.type === 'error' ? styles.testStatusError : null,
+                            ]}
+                        >
+                            {testStatus.message}
+                        </Text>
+                    )}
 
                     <TouchableOpacity
                         style={[styles.cancelButton, { marginTop: 20 }]}
@@ -205,7 +295,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
                         style={styles.cancelButton}
                         onPress={onClose}
                     >
-                        <Text style={styles.cancelButtonText}>Fechar Configurações</Text>
+                        <Text style={styles.cancelButtonText}>Fechar Configuracoes</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -214,23 +304,31 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, onSave,
 };
 
 const styles = StyleSheet.create({
-    lockOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(2, 6, 23, 0.98)', alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 1000 },
-    container: { width: '90%', padding: 24, paddingVertical: 32, backgroundColor: '#1e293b', borderRadius: 24, borderWidth: 1, borderColor: '#334155' },
-    title: { marginBottom: 24, fontSize: 22, color: '#fff', fontWeight: 'bold' },
+    lockOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(17,24,39,0.55)', alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 1000 },
+    container: { width: '90%', maxWidth: 1120, padding: 24, paddingVertical: 32, backgroundColor: '#ffffff', borderRadius: 24, borderWidth: 1, borderColor: '#e5e7eb', shadowColor: '#000', shadowOpacity: 0.14, shadowRadius: 20, elevation: 10 },
+    title: { marginBottom: 24, fontSize: 22, color: '#111827', fontWeight: 'bold' },
     inputGroup: { width: '100%', marginBottom: 20 },
     labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-    label: { color: '#f8fafc', fontWeight: 'bold', fontSize: 15, marginBottom: 8 },
-    input: { backgroundColor: '#334155', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, color: '#f8fafc', fontSize: 16, borderWidth: 1, borderColor: '#475569' },
-    scanButton: { backgroundColor: '#1e293b', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#334155' },
-    scanButtonText: { color: '#60a5fa', fontSize: 12, fontWeight: 'bold' },
-    progressText: { color: '#94a3b8', fontSize: 10, marginTop: 4, textAlign: 'center' },
-    saveButton: { width: '100%', backgroundColor: '#2563eb', paddingVertical: 16, borderRadius: 16, alignItems: 'center', marginBottom: 16 },
+    label: { color: '#374151', fontWeight: 'bold', fontSize: 15, marginBottom: 8 },
+    input: { backgroundColor: '#f9fafb', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, color: '#111827', fontSize: 16, borderWidth: 1, borderColor: '#d1d5db' },
+    scanButton: { backgroundColor: '#fff7ed', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#fdba74' },
+    scanButtonText: { color: '#c2410c', fontSize: 12, fontWeight: 'bold' },
+    progressText: { color: '#6b7280', fontSize: 10, marginTop: 4, textAlign: 'center' },
+    previewText: { color: '#6b7280', fontSize: 12, marginTop: 8 },
+    langRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    langButton: { paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10, backgroundColor: '#f3f4f6', borderWidth: 1, borderColor: '#e5e7eb' },
+    langButtonSelected: { backgroundColor: '#4f46e5', borderColor: '#4f46e5' },
+    langButtonText: { color: '#374151', fontWeight: 'bold' },
+    langButtonTextSelected: { color: '#fff' },
+    saveButton: { width: '100%', backgroundColor: '#4f46e5', paddingVertical: 18, borderRadius: 16, alignItems: 'center', marginBottom: 16 },
     saveButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+    testButton: { width: '100%', backgroundColor: '#f3f4f6', paddingVertical: 14, borderRadius: 16, alignItems: 'center' },
+    testButtonText: { color: '#111827', fontWeight: 'bold', fontSize: 15 },
+    testStatusText: { marginTop: 12, textAlign: 'center', color: '#6b7280', fontSize: 14 },
+    testStatusSuccess: { color: '#15803d' },
+    testStatusError: { color: '#dc2626' },
     cancelButton: { alignItems: 'center' },
-    cancelButtonText: { color: '#94a3b8', fontSize: 16 },
-    themeButton: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, opacity: 0.7 },
-    themeButtonSelected: { opacity: 1, borderWidth: 2, borderColor: '#fff' },
-    themeButtonText: { color: 'rgba(255,255,255,0.7)', fontWeight: 'bold' },
+    cancelButtonText: { color: '#6b7280', fontSize: 16 },
 });
 
 export default SettingsModal;

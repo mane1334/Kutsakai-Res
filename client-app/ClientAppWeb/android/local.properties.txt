@@ -1,0 +1,3 @@
+properties
+    sdk.dir=C\:\\Users\\maneb\\AppData\\Local\\Android\\Sdk
+    

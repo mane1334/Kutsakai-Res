@@ -3,11 +3,18 @@ import { getMenu } from '../services/api';
 import { toast } from 'react-toastify';
 import { formatCurrency } from '../utils/currency';
 import { useCartDispatch } from '../CartContext';
-import { API_URL, BASE_URL } from '../config';
 import { resolveImageUrl, PLACEHOLDER_IMG } from '../utils/images';
 import { normalizeDish } from '../utils/text';
 import DishModal from './DishModal';
-const DishList = () => {
+
+const categories = {
+  1: 'Entradas',
+  2: 'Pratos Principais',
+  3: 'Sobremesas',
+  4: 'Bebidas'
+};
+
+const DishList = ({ footer = null }) => {
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,14 +22,6 @@ const DishList = () => {
   const [selectedDish, setSelectedDish] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useCartDispatch();
-
-  // Categorias dos pratos
-  const categories = {
-    1: 'Entradas',
-    2: 'Pratos Principais', 
-    3: 'Sobremesas',
-    4: 'Bebidas'
-  };
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -37,13 +36,13 @@ const DishList = () => {
         setLoading(false);
       }
     };
+
     fetchMenu();
   }, []);
 
-  // Filtrar pratos por categoria
-  const filteredDishes = selectedCategory === 'all' 
-    ? dishes 
-    : dishes.filter(dish => dish.category_id === parseInt(selectedCategory));
+  const filteredDishes = selectedCategory === 'all'
+    ? dishes
+    : dishes.filter((dish) => dish.category_id === Number.parseInt(selectedCategory, 10));
 
   const openModal = (dish) => {
     setSelectedDish(dish);
@@ -56,135 +55,177 @@ const DishList = () => {
   };
 
   const handleAddToCart = () => {
-    if (selectedDish) {
-      dispatch({ type: 'ADD_ITEM', dish: selectedDish });
-      toast.success(`${selectedDish.name} foi para o carrinho!`);
-    }
+    if (!selectedDish) return;
+    dispatch({ type: 'ADD_ITEM', dish: selectedDish });
+    toast.success(`${selectedDish.name} foi para o carrinho!`);
   };
 
-  if (loading) return (
-    <div className="p-4">
-      <h2 className="text-3xl md:text-4xl font-extrabold text-center text-gray-800 mb-4 md:mb-6">Nosso Cardápio</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, idx) => (
-          <div key={idx} className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
-            <div className="w-full h-48 skeleton"></div>
-            <div className="p-5 space-y-3">
-              <div className="h-6 w-2/3 skeleton rounded"></div>
-              <div className="h-4 w-full skeleton rounded"></div>
-              <div className="h-4 w-5/6 skeleton rounded"></div>
-              <div className="flex justify-between items-center pt-2">
-                <div className="h-6 w-24 skeleton rounded"></div>
-                <div className="flex gap-2">
-                  <div className="h-9 w-20 skeleton rounded-full"></div>
-                  <div className="h-9 w-20 skeleton rounded-full"></div>
-                </div>
+  const addDishToCart = (dish) => {
+    dispatch({ type: 'ADD_ITEM', dish });
+    toast.success(`${dish.name} foi para o carrinho!`);
+  };
+
+  const categoryCount = (categoryId) => dishes.filter((dish) => String(dish.category_id) === String(categoryId)).length;
+
+  const renderShell = (content) => (
+    <section className="flex min-h-0 flex-col overflow-hidden rounded-[32px] border border-white/70 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.10)] backdrop-blur-sm">
+      <div className="border-b border-gray-100 px-5 py-5 md:px-8">
+        <h2 className="text-center text-3xl font-extrabold text-gray-800 md:text-4xl">Nosso Cardápio</h2>
+      </div>
+      {content}
+    </section>
+  );
+
+  const renderCards = (items) => (
+    <div key={selectedCategory} className="stagger grid grid-cols-1 gap-6 pb-6 sm:grid-cols-2 xl:grid-cols-3">
+      {items.map((dish) => (
+        <article
+          key={dish.id}
+          className="fade-in overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-xl transition-all duration-300 ease-in-out hover:scale-[1.02]"
+        >
+          <div className="dish-image relative cursor-pointer" onClick={() => openModal(dish)}>
+            <img
+              src={resolveImageUrl(dish.image_url) || PLACEHOLDER_IMG}
+              alt={dish.name}
+              className="h-48 w-full object-cover transition-all duration-300 hover:brightness-110"
+              crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.currentTarget.src = PLACEHOLDER_IMG;
+              }}
+              loading="lazy"
+            />
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 hover:bg-black/20">
+              <span className="rounded-full bg-white/85 px-4 py-2 text-sm font-semibold text-gray-700 opacity-0 transition-opacity duration-300">
+                Ver Detalhes
+              </span>
+            </div>
+          </div>
+          <div className="p-5">
+            <h3
+              className="mb-2 cursor-pointer text-2xl font-bold text-gray-900 transition-colors hover:text-red-600"
+              onClick={() => openModal(dish)}
+            >
+              {dish.name}
+            </h3>
+            <p className="mb-4 line-clamp-3 text-sm text-gray-700">{dish.description}</p>
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <p className="text-xl font-extrabold text-red-600">{formatCurrency(dish.price)}</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => openModal(dish)}
+                  className="rounded-full bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors duration-300 hover:bg-gray-200"
+                >
+                  Ver Mais
+                </button>
+                <button
+                  onClick={() => addDishToCart(dish)}
+                  className="rounded-full bg-red-600 px-5 py-2 text-sm font-bold text-white shadow-md transition-colors duration-300 hover:bg-red-700"
+                >
+                  Pedir
+                </button>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </article>
+      ))}
     </div>
   );
-  if (error) return <div className="p-4 text-red-600 bg-red-100 rounded-lg">{error}</div>;
 
-  return (
-    <div className="p-4">
-      <h2 className="text-3xl md:text-4xl font-extrabold text-center text-gray-800 mb-4 md:mb-6">Nosso Cardápio</h2>
-      
-      {/* Category Filter Buttons */}
-      <div className="flex flex-wrap justify-center gap-3 md:gap-4 mb-6 md:mb-8">
-        <button
-          onClick={() => setSelectedCategory('all')}
-          className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 transform ${
-            selectedCategory === 'all'
-              ? 'bg-red-600 text-white shadow-lg scale-105'
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:scale-[1.02]'
-          }`}
-        >
-          Todos os Pratos
-        </button>
-        {Object.entries(categories).map(([categoryId, categoryName]) => (
-          <button
-            key={categoryId}
-            onClick={() => setSelectedCategory(categoryId)}
-            className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 transform ${
-              selectedCategory === categoryId
-                ? 'bg-red-600 text-white shadow-lg scale-105'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:scale-[1.02]'
-            }`}
-          >
-            {categoryName}
-            <span className="ml-2 inline-flex items-center justify-center min-w-6 h-6 px-2 text-xs font-bold rounded-full bg-red-50 text-red-700 border border-red-200">
-              {dishes.filter(d => String(d.category_id) === String(categoryId)).length}
-            </span>
-          </button>
-        ))}
-      </div>
-      
-      {filteredDishes.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-gray-500 text-lg">Nenhum prato encontrado nesta categoria.</div>
-        </div>
-      ) : (
-        <div key={selectedCategory} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger">
-        {filteredDishes.map(dish => (
-          <div key={dish.id} className="bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300 ease-in-out border border-gray-200 fade-in">
-            <div className="dish-image cursor-pointer relative" onClick={() => openModal(dish)}>
-              <img 
-                src={resolveImageUrl(dish.image_url) || PLACEHOLDER_IMG} 
-                alt={dish.name} 
-                className="w-full h-48 object-cover transition-all duration-300 hover:brightness-110"
-                crossOrigin="anonymous"
-                referrerPolicy="no-referrer"
-                onError={(e) => {
-                  e.currentTarget.src = PLACEHOLDER_IMG;
-                }}
-                loading="lazy"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                <span className="text-white font-semibold opacity-0 transition-opacity duration-300">
-                  🔍 Ver Detalhes
-                </span>
-              </div>
-            </div>
-            <div className="p-5">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2 cursor-pointer hover:text-red-600 transition-colors" onClick={() => openModal(dish)}>{dish.name}</h3>
-              <p className="text-gray-700 text-sm mb-4 line-clamp-3">{dish.description}</p>
-              <div className="flex justify-between items-center mt-4">
-                <p className="text-xl font-extrabold text-red-600">{formatCurrency(dish.price)}</p>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => openModal(dish)}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full transition-colors duration-300 text-sm"
-                  >
-                    Ver Mais
-                  </button>
-                  <button 
-                    onClick={() => {
-                      dispatch({ type: 'ADD_ITEM', dish });
-                      toast.success(`${dish.name} foi para o carrinho!`);
-                    }}
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-5 rounded-full transition-colors duration-300 shadow-md"
-                  >
-                    Pedir
-                  </button>
+  if (loading) {
+    return renderShell(
+      <div className="min-h-0 flex-1 px-5 py-5 md:px-8">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <div key={idx} className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-xl">
+              <div className="skeleton h-48 w-full"></div>
+              <div className="space-y-3 p-5">
+                <div className="skeleton h-6 w-2/3 rounded"></div>
+                <div className="skeleton h-4 w-full rounded"></div>
+                <div className="skeleton h-4 w-5/6 rounded"></div>
+                <div className="flex items-center justify-between pt-2">
+                  <div className="skeleton h-6 w-24 rounded"></div>
+                  <div className="flex gap-2">
+                    <div className="skeleton h-9 w-20 rounded-full"></div>
+                    <div className="skeleton h-9 w-20 rounded-full"></div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
         </div>
-      )}
-      
-      {/* Dish Detail Modal */}
-      <DishModal 
+      </div>
+    );
+  }
+
+  if (error) {
+    return renderShell(
+      <div className="flex flex-1 items-center justify-center px-5 py-10 md:px-8">
+        <div className="w-full rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-center text-red-600">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  return renderShell(
+    <>
+      <div className="min-h-0 flex-1 px-5 py-4 md:px-8">
+        <div className="sticky top-0 z-10 -mx-1 mb-5 bg-white/95 px-1 pb-3 pt-1 backdrop-blur-sm">
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                selectedCategory === 'all'
+                  ? 'border-red-600 bg-red-600 text-white shadow-md'
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:bg-red-50'
+              }`}
+            >
+              Todos os Pratos
+            </button>
+            {Object.entries(categories).map(([categoryId, categoryName]) => (
+              <button
+                key={categoryId}
+                onClick={() => setSelectedCategory(categoryId)}
+                className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                  selectedCategory === categoryId
+                    ? 'border-red-600 bg-red-600 text-white shadow-md'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:bg-red-50'
+                }`}
+              >
+                <span>{categoryName}</span>
+                <span
+                  className={`ml-2 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-bold ${
+                    selectedCategory === categoryId
+                      ? 'bg-white/20 text-white'
+                      : 'bg-red-50 text-red-700'
+                  }`}
+                >
+                  {categoryCount(categoryId)}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filteredDishes.length === 0 ? (
+          <div className="flex min-h-[320px] items-center justify-center rounded-[28px] border border-dashed border-gray-200 bg-gray-50 px-6 text-center">
+            <div className="text-lg text-gray-500">Nenhum prato encontrado nesta categoria.</div>
+          </div>
+        ) : (
+          renderCards(filteredDishes)
+        )}
+
+        {footer ? <div className="pt-4">{footer}</div> : null}
+      </div>
+
+      <DishModal
         dish={selectedDish}
         isOpen={isModalOpen}
         onClose={closeModal}
         onAddToCart={handleAddToCart}
       />
-    </div>
+    </>
   );
 };
 

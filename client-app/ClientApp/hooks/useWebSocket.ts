@@ -39,7 +39,7 @@ export const useWebSocket = ({
 
         ws.onopen = () => {
             isConnectedRef.current = true;
-            console.log('WebSocket conectado');
+            if (__DEV__) console.log('WebSocket conectado');
             onOpen?.();
         };
 
@@ -48,18 +48,18 @@ export const useWebSocket = ({
                 const data = JSON.parse(event.data);
                 onMessage?.(data);
             } catch (e) {
-                console.error('Erro ao processar mensagem WebSocket:', e);
+                if (__DEV__) console.error('Erro ao processar mensagem WebSocket:', e);
             }
         };
 
         ws.onerror = (error) => {
-            console.error('Erro WebSocket:', error);
+            if (__DEV__) console.error('Erro WebSocket:', error);
             onError?.(error);
         };
 
         ws.onclose = () => {
             isConnectedRef.current = false;
-            console.log('WebSocket desconectado');
+            if (__DEV__) console.log('WebSocket desconectado');
             onClose?.();
         };
 

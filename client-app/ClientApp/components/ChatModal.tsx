@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     SafeAreaView,
     View,
@@ -13,18 +13,22 @@ import {
     Platform,
 } from 'react-native';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import { API_URL } from '../config';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const audioRecorderPlayer = new (AudioRecorderPlayer as any)();
 
 interface ChatModalProps {
     visible: boolean;
     onClose: () => void;
+    apiUrl: string;
+    restaurantId?: string;
 }
 
-const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
+const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose, apiUrl, restaurantId = '1' }) => {
     const [message, setMessage] = useState('');
-    const [chatHistory, setChatHistory] = useState<{ role: string; content: string; audio_url?: string }[]>([]);
+    const [chatHistory, setChatHistory] = useState<{ role: string; content: string; audio_url?: string }[]>([
+        { role: 'assistant', content: 'Ola! Sou seu assistente virtual. Pergunte-me sobre os pratos do cardapio!' }
+    ]);
     const [isLoading, setIsLoading] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
@@ -35,8 +39,8 @@ const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
                 const granted = await PermissionsAndroid.request(
                     PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
                     {
-                        title: 'Permissão de Gravação de Áudio',
-                        message: 'Este aplicativo precisa de acesso ao seu microfone para gravação de voz.',
+                        title: 'Permissao de Gravacao de Audio',
+                        message: 'Este aplicativo precisa de acesso ao microfone para gravacao de voz.',
                         buttonNeutral: 'Perguntar Depois',
                         buttonNegative: 'Cancelar',
                         buttonPositive: 'OK',
@@ -44,7 +48,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
                 );
                 return granted === PermissionsAndroid.RESULTS.GRANTED;
             } catch (err) {
-                console.warn(err);
+                if (__DEV__) console.warn(err);
                 return false;
             }
         }
@@ -53,8 +57,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
 
     const playResponse = async (url: string) => {
         try {
-            const fullUrl = url.startsWith('http') ? url : `${API_URL.replace('/api', '')}${url}`;
-            console.log('Reproduzindo áudio:', fullUrl);
+            const fullUrl = url.startsWith('http') ? url : `${apiUrl.replace('/api', '')}${url}`;
             await audioRecorderPlayer.startPlayer(fullUrl);
             audioRecorderPlayer.addPlayBackListener((e: any) => {
                 if (e.currentPosition === e.duration) {
@@ -62,14 +65,14 @@ const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
                 }
             });
         } catch (err) {
-            console.error('Erro ao reproduzir áudio:', err);
+            if (__DEV__) console.error('Erro ao reproduzir audio:', err);
         }
     };
 
     const onStartRecord = async () => {
         const hasPermission = await requestAudioPermission();
         if (!hasPermission) {
-            setChatHistory(prev => [...prev, { role: 'assistant', content: 'Permissão de microfone negada.' }]);
+            setChatHistory((prev) => [...prev, { role: 'assistant', content: 'Permissao de microfone negada.' }]);
             return;
         }
 
@@ -78,12 +81,10 @@ const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
                 ios: 'hello.m4a',
                 android: 'sdcard/hello.mp4',
             });
-            const uri = await audioRecorderPlayer.startRecorder(path!);
+            await audioRecorderPlayer.startRecorder(path!);
             setIsRecording(true);
-            console.log(`started recording at: ${uri}`);
         } catch (err) {
-            console.error('Erro ao iniciar gravação:', err);
-            setChatHistory(prev => [...prev, { role: 'assistant', content: 'Erro ao iniciar gravação.' }]);
+            if (__DEV__) console.error('Erro ao iniciar gravacao:', err);
         }
     };
 
@@ -101,19 +102,19 @@ const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
             } as any);
 
             setIsLoading(true);
-            const response = await fetch(`${API_URL}/chat/voice`, {
+            const response = await fetch(`${apiUrl}/chat/voice`, {
                 method: 'POST',
+                headers: { 'x-restaurant-id': restaurantId },
                 body: formData,
             });
             const data = await response.json();
-            setChatHistory(prev => [...prev, { role: 'user', content: data.transcription || 'Áudio enviado.' }]);
+            setChatHistory((prev) => [...prev, { role: 'user', content: data.transcription || 'Audio enviado.' }]);
             if (data.reply) {
-                setChatHistory(prev => [...prev, { role: 'assistant', content: data.reply, audio_url: data.audio_url }]);
+                setChatHistory((prev) => [...prev, { role: 'assistant', content: data.reply, audio_url: data.audio_url }]);
                 if (data.audio_url) playResponse(data.audio_url);
             }
         } catch (err) {
-            console.error('Erro ao parar gravação ou enviar áudio:', err);
-            setChatHistory(prev => [...prev, { role: 'assistant', content: 'Erro ao processar áudio.' }]);
+            setChatHistory((prev) => [...prev, { role: 'assistant', content: 'Erro ao processar audio.' }]);
         } finally {
             setIsLoading(false);
         }
@@ -123,23 +124,22 @@ const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
         if (!message.trim()) return;
 
         const userMessage = { role: 'user', content: message };
-        setChatHistory(prev => [...prev, userMessage]);
+        setChatHistory((prev) => [...prev, userMessage]);
         const currentMsg = message;
         setMessage('');
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/chat`, {
+            const response = await fetch(`${apiUrl}/chat`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-restaurant-id': restaurantId },
                 body: JSON.stringify({ message: currentMsg }),
             });
             const data = await response.json();
-            setChatHistory(prev => [...prev, { role: 'assistant', content: data.reply, audio_url: data.audio_url }]);
+            setChatHistory((prev) => [...prev, { role: 'assistant', content: data.reply, audio_url: data.audio_url }]);
             if (data.audio_url) playResponse(data.audio_url);
         } catch (error) {
-            console.error('Erro no chat:', error);
-            setChatHistory(prev => [...prev, { role: 'assistant', content: 'Desculpe, estou com problemas. Tente novamente.' }]);
+            setChatHistory((prev) => [...prev, { role: 'assistant', content: 'Desculpe, estou com problemas. Tente novamente.' }]);
         } finally {
             setIsLoading(false);
         }
@@ -150,53 +150,81 @@ const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
     }, [chatHistory]);
 
     return (
-        <Modal visible={visible} animationType="fade" transparent={false} onRequestClose={onClose}>
+        <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
             <SafeAreaView style={styles.modalContainer}>
                 <View style={styles.chatHeader}>
-                    <Text style={styles.chatTitle}>Gêmeos AI</Text>
-                    <TouchableOpacity onPress={() => {
-                        audioRecorderPlayer.stopPlayer();
-                        onClose();
-                    }}>
-                        <Text style={styles.closeButton}>Voltar</Text>
+                    <View style={styles.headerInfo}>
+                        <Text style={styles.chatTitle}>Gemeos AI</Text>
+                        <View style={styles.onlineBadge}>
+                            <View style={styles.onlineDot} />
+                            <Text style={styles.onlineText}>Online</Text>
+                        </View>
+                    </View>
+
+                    <TouchableOpacity
+                        onPress={() => {
+                            audioRecorderPlayer.stopPlayer();
+                            onClose();
+                        }}
+                        style={styles.closeBtn}
+                    >
+                        <Text style={styles.closeBtnText}>Voltar</Text>
                     </TouchableOpacity>
                 </View>
-                <ScrollView ref={scrollViewRef} style={styles.chatHistory} contentContainerStyle={{ paddingBottom: 20 }}>
+
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.chatHistory}
+                    contentContainerStyle={styles.chatHistoryContent}
+                >
                     {chatHistory.map((msg, index) => (
-                        <View key={index} style={msg.role === 'user' ? styles.userMessage : styles.aiMessage}>
-                            <Text style={styles.messageText}>{msg.content}</Text>
-                            {msg.audio_url && (
-                                <TouchableOpacity onPress={() => playResponse(msg.audio_url!)} style={styles.playButtonMini}>
-                                    <Text style={styles.playButtonTextMini}>▶ Ouvir</Text>
-                                </TouchableOpacity>
-                            )}
+                        <View key={index} style={[styles.messageRow, msg.role === 'user' ? styles.userRow : styles.aiRow]}>
+                            <View style={[styles.messageBubble, msg.role === 'user' ? styles.userBubble : styles.aiBubble]}>
+                                <Text style={[styles.messageText, msg.role === 'user' ? styles.userText : styles.aiText]}>{msg.content}</Text>
+
+                                {msg.audio_url && (
+                                    <TouchableOpacity onPress={() => playResponse(msg.audio_url!)} style={styles.audioBtn}>
+                                        <Text style={styles.audioBtnText}>Ouvir resposta</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
                         </View>
                     ))}
+
                     {isLoading && (
-                        <View style={styles.aiMessage}>
-                            <ActivityIndicator size="small" color="#94a3b8" />
+                        <View style={styles.aiRow}>
+                            <View style={[styles.messageBubble, styles.loadingBubble]}>
+                                <ActivityIndicator size="small" color="#dc2626" />
+                            </View>
                         </View>
                     )}
                 </ScrollView>
+
                 <View style={styles.chatInputContainer}>
                     <TouchableOpacity
-                        style={[styles.recordButton, isRecording && { backgroundColor: '#ef4444' }]}
+                        style={[styles.recordBtn, isRecording && styles.recordBtnActive]}
                         onPressIn={onStartRecord}
                         onPressOut={onStopRecord}
                     >
-                        <Text style={styles.sendButtonText}>{isRecording ? 'Gravando...' : '🎤'}</Text>
+                        <Ionicons name={isRecording ? 'radio-button-on' : 'mic'} size={20} color="#fff" />
                     </TouchableOpacity>
+
                     <TextInput
                         style={styles.chatInput}
                         value={message}
                         onChangeText={setMessage}
-                        placeholder="Pergunte algo..."
-                        placeholderTextColor="#94a3b8"
+                        placeholder={isLoading ? 'Aguarde...' : 'Pergunte algo...'}
+                        placeholderTextColor="#9ca3af"
                         onSubmitEditing={handleSend}
-                        editable={!isRecording}
+                        editable={!isRecording && !isLoading}
                     />
-                    <TouchableOpacity style={styles.sendButton} onPress={handleSend} disabled={isRecording || !message.trim()}>
-                        <Text style={styles.sendButtonText}>➤</Text>
+
+                    <TouchableOpacity
+                        style={[styles.sendBtn, (!message.trim() || isRecording || isLoading) && styles.sendBtnDisabled]}
+                        onPress={handleSend}
+                        disabled={isRecording || !message.trim() || isLoading}
+                    >
+                        <Ionicons name="send" size={18} color="#fff" />
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -204,22 +232,111 @@ const ChatModal: React.FC<ChatModalProps> = ({ visible, onClose }) => {
     );
 };
 
+const RED_WEB = '#dc2626';
+const BLUE_WEB = '#2563eb';
+const DARK_BG = '#020617';
+const DARK_PANEL = '#0f172a';
+const DARK_BUBBLE = '#1e293b';
+const DARK_BORDER = '#334155';
+
 const styles = StyleSheet.create({
-    modalContainer: { flex: 1, backgroundColor: '#020617' },
-    chatHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 24, borderBottomWidth: 1, borderColor: '#1e293b', backgroundColor: '#0f172a' },
-    chatTitle: { fontSize: 24, fontWeight: '900', color: '#f8fafc' },
-    closeButton: { fontSize: 16, color: '#2563eb', fontWeight: '800' },
-    chatHistory: { flex: 1, padding: 20 },
-    userMessage: { alignSelf: 'flex-end', backgroundColor: '#2563eb', borderRadius: 22, borderBottomRightRadius: 4, padding: 16, marginBottom: 16, maxWidth: '80%', shadowColor: '#2563eb', shadowOpacity: 0.2, shadowRadius: 10 },
-    aiMessage: { alignSelf: 'flex-start', backgroundColor: '#1e293b', borderRadius: 22, borderBottomLeftRadius: 4, padding: 16, marginBottom: 16, maxWidth: '80%', borderWidth: 1, borderColor: '#334155' },
-    messageText: { color: '#f8fafc', fontSize: 16, lineHeight: 24 },
-    playButtonMini: { marginTop: 8, backgroundColor: '#334155', padding: 6, borderRadius: 8, alignSelf: 'flex-start' },
-    playButtonTextMini: { color: '#fff', fontSize: 12 },
-    chatInputContainer: { flexDirection: 'row', alignItems: 'center', padding: 16, borderTopWidth: 1, borderColor: '#1e293b', backgroundColor: '#0f172a' },
-    recordButton: { marginRight: 10, padding: 12, borderRadius: 50, backgroundColor: '#334155' },
-    chatInput: { flex: 1, backgroundColor: '#1e293b', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, color: '#f8fafc', fontSize: 16, marginRight: 10 },
-    sendButton: { padding: 12, backgroundColor: '#2563eb', borderRadius: 50 },
-    sendButtonText: { color: '#fff', fontSize: 16 },
+    modalContainer: { flex: 1, backgroundColor: DARK_BG },
+    chatHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 18,
+        backgroundColor: DARK_PANEL,
+        borderBottomWidth: 1,
+        borderColor: DARK_BORDER,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        elevation: 5,
+    },
+    headerInfo: { flexDirection: 'column' },
+    chatTitle: { fontSize: 22, fontWeight: '900', color: '#f8fafc' },
+    onlineBadge: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+    onlineDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#10b981', marginRight: 6 },
+    onlineText: { fontSize: 12, color: '#9ca3af', fontWeight: '600' },
+    closeBtn: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: DARK_BORDER, borderRadius: 999 },
+    closeBtnText: { fontSize: 13, color: '#f8fafc', fontWeight: '700' },
+    chatHistory: { flex: 1, backgroundColor: DARK_BG },
+    chatHistoryContent: { paddingBottom: 30, paddingTop: 18, paddingHorizontal: 14 },
+    messageRow: { marginBottom: 16, paddingHorizontal: 16, width: '100%' },
+    userRow: { alignItems: 'flex-end' },
+    aiRow: { alignItems: 'flex-start' },
+    messageBubble: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 18,
+        maxWidth: '62%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    userBubble: { backgroundColor: BLUE_WEB, borderBottomRightRadius: 4, shadowColor: BLUE_WEB, shadowOpacity: 0.2, shadowRadius: 10 },
+    aiBubble: { backgroundColor: DARK_BUBBLE, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: DARK_BORDER },
+    loadingBubble: { backgroundColor: DARK_BUBBLE, paddingVertical: 12, paddingHorizontal: 18, borderWidth: 1, borderColor: DARK_BORDER },
+    messageText: { fontSize: 16, lineHeight: 22 },
+    userText: { color: '#fff', fontWeight: '500' },
+    aiText: { color: '#fff', fontWeight: '500' },
+    audioBtn: { marginTop: 10, backgroundColor: DARK_BORDER, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10, alignSelf: 'flex-start' },
+    audioBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+    chatInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingTop: 14,
+        paddingBottom: Platform.OS === 'ios' ? 28 : 16,
+        borderTopWidth: 1,
+        borderColor: DARK_BORDER,
+        backgroundColor: DARK_PANEL,
+        shadowColor: '#000',
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    recordBtn: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: DARK_BORDER,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    recordBtnActive: { backgroundColor: '#fee2e2', borderWidth: 1, borderColor: RED_WEB },
+    recordBtnText: { fontSize: 11, color: '#f8fafc', fontWeight: '800' },
+    chatInput: {
+        flex: 1,
+        backgroundColor: DARK_BUBBLE,
+        borderRadius: 26,
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        color: '#f8fafc',
+        fontSize: 16,
+        marginRight: 10,
+        borderWidth: 1,
+        borderColor: DARK_BORDER,
+    },
+    sendBtn: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: RED_WEB,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: RED_WEB,
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 3,
+    },
+    sendBtnDisabled: { backgroundColor: '#9ca3af', shadowOpacity: 0, elevation: 0 },
+    sendIcon: { color: '#fff', fontSize: 12, fontWeight: '900' },
 });
 
 export default ChatModal;

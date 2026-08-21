@@ -9,6 +9,7 @@ interface UseInactivityLockProps {
 
 interface UseInactivityLockReturn {
     isLocked: boolean;
+    lock: () => void;
     unlock: () => void;
     registerInteraction: () => void;
 }
@@ -29,6 +30,11 @@ export const useInactivityLock = ({
         setIsLocked(false);
         registerInteraction();
     }, [registerInteraction]);
+
+    const lock = useCallback(() => {
+        setIsLocked(true);
+        onLock?.();
+    }, [onLock]);
 
     useEffect(() => {
         if (!enabled || timeoutMinutes <= 0) return;
@@ -59,6 +65,7 @@ export const useInactivityLock = ({
 
     return {
         isLocked,
+        lock,
         unlock,
         registerInteraction,
     };

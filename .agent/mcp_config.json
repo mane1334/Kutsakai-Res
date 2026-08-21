@@ -1,0 +1,24 @@
+{
+    "mcpServers": {
+        "context7": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@upstash/context7-mcp",
+                "--api-key",
+                "ctx7sk-c4442d63-c6b2-435f-8fe5-73fe12e8874f"
+            ]
+        },
+        "shadcn": {
+            "command": "npx",
+            "args": [
+                "shadcn@latest",
+                "mcp"
+            ]
+        }
+        //other mcp servers
+    }
+}
+
+// setup mcp server in  ~/.gemini\antigravity\mcp_config.json
+

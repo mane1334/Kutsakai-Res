@@ -5,6 +5,297 @@ html, body, #root {
 }
 
 body {
-  background-color: rgb(243 244 246); /* bg-gray-100 */
-  color: rgb(31 41 55); /* text-gray-800 */
+  background-color: #fff7ed;
+  color: #1f1115;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  text-rendering: optimizeLegibility;
+}
+
+.admin-card {
+  border: 1px solid #e7c8c2;
+  background: #ffffff;
+  border-radius: 0.5rem;
+}
+
+.admin-sidebar {
+  background: #571923 !important;
+  border-right: 1px solid #4c121a !important;
+  box-shadow: 0 18px 50px rgb(76 18 26 / 0.22);
+  color: #ffffff !important;
+}
+
+.admin-sidebar-header {
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.admin-header {
+  background: #571923 !important;
+  border-bottom: 1px solid #4c121a !important;
+  color: #ffffff !important;
+}
+
+.admin-sidebar-link {
+  border: 1px solid transparent;
+  color: rgb(255 241 242 / 0.92) !important;
+}
+
+.admin-sidebar-link:hover {
+  background: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.1);
+  color: #ffffff !important;
+}
+
+.admin-sidebar-link-active {
+  background: #ffffff;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  box-shadow: 0 10px 24px rgb(15 23 42 / 0.1);
+  color: #5d1721 !important;
+  font-weight: 700;
+}
+
+.admin-sidebar-link-active:hover {
+  background: #ffffff;
+  color: #5d1721 !important;
+}
+
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin-page-header {
+  align-items: flex-end;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.admin-page-copy {
+  color: #7a4a54;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  margin-top: 0.5rem;
+  max-width: 48rem;
+}
+
+.admin-kicker {
+  color: #7a4a54;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+.admin-page-title {
+  color: #1f1115;
+  font-size: clamp(1.5rem, 2vw, 1.875rem);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.admin-section-title {
+  color: #1f1115;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.admin-field-label {
+  color: #5f323b;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.admin-input {
+  background: #ffffff;
+  border: 1px solid #e7c8c2;
+  border-radius: 0.5rem;
+  color: #1f1115;
+  margin-top: 0.5rem;
+  outline: none;
+  padding: 0.75rem 1rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  width: 100%;
+}
+
+.admin-input:focus {
+  border-color: #6d2430;
+  box-shadow: 0 0 0 3px rgb(109 36 48 / 0.14);
+}
+
+.admin-soft-panel {
+  background: #fff1f2;
+  border: 1px solid #e7c8c2;
+  border-radius: 0.5rem;
+}
+
+.admin-danger-btn {
+  align-items: center;
+  background: #ba1a1a;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 0.625rem 1rem;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.admin-danger-btn:hover {
+  opacity: 0.92;
+}
+
+.admin-primary-btn {
+  align-items: center;
+  background: #6d2430;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 0.625rem 1rem;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.admin-primary-btn:hover {
+  opacity: 0.92;
+}
+
+.admin-primary-btn:active {
+  transform: translateY(1px);
+}
+
+.admin-secondary-btn {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e7c8c2;
+  border-radius: 0.5rem;
+  color: #5f323b;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 0.625rem 1rem;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.admin-secondary-btn:hover {
+  background: #fff1f2;
+  border-color: #b97c83;
+}
+
+/* Login Page Premium Styles */
+.admin-login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff7ed;
+  padding: 1.5rem;
+}
+
+.admin-login-card {
+  background: #ffffff;
+  padding: 2.5rem 2rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e7c8c2;
+  box-shadow: 0 20px 40px -15px rgb(109 36 48 / 0.12), 0 0 0 1px rgb(109 36 48 / 0.02);
+  width: 100%;
+  max-width: 24rem;
+  animation: admin-fade-in 450ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes admin-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-input-wrapper {
+  position: relative;
+  margin-top: 0.5rem;
+}
+
+.admin-input-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7a4a54;
+  pointer-events: none;
+  transition: color 160ms ease;
+}
+
+.admin-input-with-icon {
+  background: #ffffff;
+  border: 1px solid #e7c8c2;
+  border-radius: 0.5rem;
+  color: #1f1115;
+  outline: none;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  width: 100%;
+}
+
+.admin-input-with-icon:focus {
+  border-color: #6d2430;
+  box-shadow: 0 0 0 3px rgb(109 36 48 / 0.14);
+}
+
+.admin-input-wrapper:focus-within .admin-input-icon {
+  color: #6d2430;
+}
+
+.admin-login-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgb(109 36 48 / 0.15);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  background-color: #6d2430 !important;
+  cursor: pointer;
+  transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-login-btn:hover {
+  background-color: #571923 !important;
+  box-shadow: 0 6px 16px rgb(87 25 35 / 0.25);
+  transform: translateY(-1px);
+}
+
+.admin-login-btn:active {
+  transform: scale(0.98) translateY(0);
+}
+
+.admin-login-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(109 36 48 / 0.25);
+}
+
+@media (max-width: 768px) {
+  .admin-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

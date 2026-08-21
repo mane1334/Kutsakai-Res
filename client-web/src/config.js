@@ -6,32 +6,35 @@ try {
   VITE_BASE = import.meta.env && import.meta.env.VITE_BASE_URL ? import.meta.env.VITE_BASE_URL : null;
 } catch (_) {}
 
-// Função para detectar automaticamente o IP da máquina
+const normalizeBaseUrl = (rawValue) => {
+  const value = String(rawValue || '').trim().replace(/\/+$/, '');
+  if (!value) return '';
+  if (/^https?:\/\//i.test(value)) return value;
+  return `http://${value.replace(/\/.*$/, '')}`;
+};
+
 const getDefaultBase = () => {
   if (typeof window !== 'undefined' && window.location) {
-    const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
-    
-    // Se estiver em localhost, tenta detectar o IP real da máquina
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      // Em desenvolvimento, usa o hostname atual mas com porta do backend
-      return `${protocol}//${hostname}:3000`;
-    }
-    
-    // Se não for localhost, usa o hostname atual
+    const hostname = window.location.hostname || 'localhost';
+    const protocol = window.location.protocol || 'http:';
     return `${protocol}//${hostname}:3000`;
   }
-  
+
   return 'http://localhost:3000';
 };
 
-const DEFAULT_BASE = getDefaultBase();
-const BASE_URL = VITE_BASE || DEFAULT_BASE;
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const savedBase = window.localStorage.getItem('API_BASE_URL');
+    if (savedBase) return normalizeBaseUrl(savedBase);
+  }
+
+  return normalizeBaseUrl(VITE_BASE || getDefaultBase());
+};
+
+const BASE_URL = getBaseUrl();
 const API_URL = VITE_API || `${BASE_URL}/api`;
 
-// Log para debug
-console.log('🔧 Configuração da API:', { BASE_URL, API_URL });
+console.log('Configuração da API:', { BASE_URL, API_URL });
 
 export { API_URL, BASE_URL };
-
-

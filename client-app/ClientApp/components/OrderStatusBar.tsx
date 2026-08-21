@@ -1,81 +1,98 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Order } from '../types';
 import { Theme } from '../themes';
+import { getOrderStatusLabel } from '../utils/orderStatus';
 
 interface OrderStatusBarProps {
     currentOrder: Order | null;
-    onCancel: () => void;
+    onViewOrder: () => void;
     theme: Theme;
+    t?: (key: string) => string;
 }
 
-const OrderStatusBar: React.FC<OrderStatusBarProps> = ({ currentOrder, onCancel, theme }) => {
-    const [remainingPrep, setRemainingPrep] = useState<number | null>(null);
-    const [remainingCancelMs, setRemainingCancelMs] = useState<number>(0);
-
-    useEffect(() => {
-        if (currentOrder) {
-            setRemainingPrep(currentOrder.prepSeconds);
-        } else {
-            setRemainingPrep(null);
-        }
-    }, [currentOrder?.prepSeconds]);
-
-    useEffect(() => {
-        let prepInterval: any;
-        if (currentOrder && typeof remainingPrep === 'number') {
-            prepInterval = setInterval(() => {
-                setRemainingPrep(prev => (prev != null ? Math.max(0, prev - 1) : prev));
-            }, 1000);
-        }
-        return () => { if (prepInterval) clearInterval(prepInterval); };
-    }, [currentOrder, remainingPrep]);
-
-    useEffect(() => {
-        let cancelInterval: any;
-        if (currentOrder?.cancelUntil) {
-            cancelInterval = setInterval(() => {
-                const diff = new Date(currentOrder.cancelUntil!).getTime() - Date.now();
-                setRemainingCancelMs(Math.max(0, diff));
-            }, 500);
-        } else {
-            setRemainingCancelMs(0);
-        }
-        return () => { if (cancelInterval) clearInterval(cancelInterval); };
-    }, [currentOrder?.cancelUntil]);
+const OrderStatusBar: React.FC<OrderStatusBarProps> = ({ currentOrder, onViewOrder, theme, t }) => {
+    const tr = (key: string, fallback: string) => t?.(key) || fallback;
 
     if (!currentOrder) return null;
 
+    const statusText = `Status: ${getOrderStatusLabel(currentOrder.status)}`;
+    const prepMinutes = currentOrder.prepSeconds ? Math.max(1, Math.ceil(currentOrder.prepSeconds / 60)) : 0;
+    const isPreparing = currentOrder.status === 'preparing';
+
     return (
-        <View style={[
-            styles.orderBar,
-            {
-                backgroundColor: theme.colors.surface,
-                borderColor: theme.colors.border,
-                shadowColor: theme.colors.text // Shadow based on text color? No, black usually better.
-            }
-        ]}>
+        <View style={[styles.orderBar, isPreparing && styles.orderBarPreparing]}>
             <View style={{ flex: 1 }}>
-                <Text style={[styles.orderBarTitle, { color: theme.colors.text }]}>Pedido em preparo</Text>
-                <Text style={[styles.orderBarText, { color: theme.colors.textSecondary }]}>Estimativa: {Math.ceil((remainingPrep ?? 0) / 60)} min</Text>
+                <Text style={styles.orderBarTitle}>{tr('your_order', 'Seu Pedido')}</Text>
+                <Text style={styles.orderBarText} numberOfLines={1}>{statusText}</Text>
+                {prepMinutes > 0 ? (
+                    <Text style={styles.orderBarPrepText}>
+                        {isPreparing
+                            ? `Preparo confirmado: cerca de ${prepMinutes} min`
+                            : `Tempo estimado: ${prepMinutes} min`}
+                    </Text>
+                ) : null}
             </View>
             <TouchableOpacity
-                disabled={remainingCancelMs <= 0}
-                onPress={onCancel}
-                style={[styles.cancelButton, { backgroundColor: theme.colors.error }, remainingCancelMs <= 0 && { opacity: 0.5 }]}
+                onPress={onViewOrder}
+                style={[styles.viewButton, { backgroundColor: theme.colors.primary }]}
             >
-                <Text style={styles.cancelButtonText}>Cancelar ({Math.ceil(remainingCancelMs / 1000)}s)</Text>
+                <Text style={styles.viewButtonText}>
+                    {tr('view_order', 'Ver Pedido')}
+                </Text>
             </TouchableOpacity>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    orderBar: { position: 'absolute', bottom: 90, left: 20, right: 20, borderWidth: 1, borderRadius: 20, padding: 16, flexDirection: 'row', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 8 },
-    orderBarTitle: { fontWeight: 'bold', fontSize: 15 },
-    orderBarText: { fontSize: 13, marginTop: 2 },
-    cancelButton: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12 },
-    cancelButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
+    orderBar: {
+        position: 'absolute',
+        bottom: 90,
+        left: 20,
+        right: 20,
+        borderWidth: 1,
+        borderRadius: 20,
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowRadius: 14,
+        elevation: 8,
+        backgroundColor: '#fff1f2', // Soft light red
+        borderColor: '#fca5a5', // Soft border red
+    },
+    orderBarPreparing: {
+        borderColor: '#f87171',
+        backgroundColor: '#ffe4e6',
+    },
+    orderBarTitle: {
+        fontWeight: '800',
+        fontSize: 16,
+        color: '#991b1b', // Deep red title
+    },
+    orderBarText: {
+        fontSize: 13,
+        marginTop: 4,
+        color: '#7f1d1d', // Dark red status
+    },
+    orderBarPrepText: {
+        fontSize: 14,
+        marginTop: 6,
+        color: '#dc2626', // Bright red prep time
+        fontWeight: '900',
+    },
+    viewButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+    },
+    viewButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 13,
+    },
 });
 
 export default OrderStatusBar;

@@ -75,10 +75,12 @@ app.get('/health', (req, res) => {
 });
 
 // Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Ads Module rodando na porta ${PORT}`);
-  console.log(`📱 Health check: http://localhost:${PORT}/health`);
-  console.log(`📊 API: http://localhost:${PORT}/api/ads`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Ads Module rodando na porta ${PORT}`);
+    console.log(`📱 Health check: http://localhost:${PORT}/health`);
+    console.log(`📊 API: http://localhost:${PORT}/api/ads`);
+  });
+}
 
 module.exports = app;

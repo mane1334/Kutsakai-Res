@@ -38,7 +38,7 @@ Sistema completo de restaurantes interativos com módulos de anúncios, IA e ges
 - **Mobile**: React Native
 - **Real-time**: WebSocket
 - **Upload**: Multer
-- **IA**: OpenAI API
+- **IA**: NVIDIA Build API (LLM) + NVIDIA NIM (ASR/TTS)
 
 ## 📦 Instalação Rápida
 
@@ -57,6 +57,9 @@ cp ads-module/env.example ads-module/.env
 
 # AI Module
 cp ai-module/env.example ai-module/.env
+
+# AI Bridge (ASR/TTS)
+cp ai-bridge/.env.example ai-bridge/.env
 ```
 
 ### 3. Iniciar todos os serviços
@@ -66,6 +69,20 @@ npm run dev
 
 # Produção
 npm start
+```
+
+### 🧠 NVIDIA (IA)
+Para ativar a IA, preencha no `.env`:
+- `NVIDIA_API_KEY`
+- `NVIDIA_MODEL`
+- `NVIDIA_ASR_FUNCTION_ID`
+- `NVIDIA_TTS_FUNCTION_ID`
+
+O backend chama o chat via REST (Build API) e o ASR/TTS via microserviço `ai-bridge`.
+
+Para validar rapidamente:
+```powershell
+./scripts/check-ai.ps1
 ```
 
 ## 🔌 Portas dos Serviços
@@ -214,4 +231,3 @@ Para dúvidas ou problemas:
 **Versão**: 2.0.0  
 **Última atualização**: Janeiro 2025  
 **Status**: Ads Module implementado e funcional! 🎉
-

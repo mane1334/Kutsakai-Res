@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#00513b",
+                        "background": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-primary-container": "#8bd6b7",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "surface-container": "#e5eeff",
+                        "inverse-primary": "#8bd6b6",
+                        "surface-container-high": "#dce9ff",
+                        "tertiary": "#2f3d51",
+                        "tertiary-container": "#465469",
+                        "on-tertiary-fixed-variant": "#3a485c",
+                        "primary-fixed-dim": "#8bd6b6",
+                        "primary-fixed": "#a6f2d1",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "outline-variant": "#bec9c2",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary-fixed": "#002116",
+                        "primary": "#004532",
+                        "on-secondary-fixed": "#131b2e",
+                        "secondary-fixed": "#dae2fd",
+                        "on-tertiary-container": "#bac8e1",
+                        "secondary-container": "#dae2fd",
+                        "surface-dim": "#cbdbf5",
+                        "surface": "#f8f9ff",
+                        "secondary": "#565e74",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#1b6b51",
+                        "tertiary-fixed-dim": "#b9c7e0",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#065f46",
+                        "tertiary-fixed": "#d5e3fd",
+                        "on-tertiary-fixed": "#0d1c2f",
+                        "inverse-on-surface": "#eaf1ff",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#5c647a",
+                        "on-surface-variant": "#3f4944",
+                        "on-background": "#0b1c30",
+                        "error": "#ba1a1a",
+                        "outline": "#6f7973",
+                        "surface-container-highest": "#d3e4fe"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "container-max": "1440px",
+                        "base": "4px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "code": ["JetBrains Mono"],
+                        "h3": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "h1": ["Inter"],
+                        "body-md": ["Inter"],
+                        "h1-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h2": ["Inter"]
+                    },
+                    "fontSize": {
+                        "code": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "h3": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "h1": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "h1-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: #f8f9ff; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md text-on-surface">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col h-screen w-64 border-r border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface z-50">
+<div class="p-lg">
+<h2 class="font-h2 text-h2 font-bold text-primary dark:text-primary-fixed-dim">Gestão Pro</h2>
+<p class="text-secondary text-label-md mt-1">Admin v1.0</p>
+</div>
+<nav class="flex-1 px-md space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-semibold active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+<span class="font-body-md">Pedidos Atuais</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-body-md">Histórico</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="font-body-md">Gestão de Pratos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-body-md">Categorias</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="star">star</span>
+<span class="font-body-md">Avaliações</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="font-body-md">Chamadas de Garçom</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md">Configurações</span>
+</a>
+</nav>
+<div class="p-lg mt-auto border-t border-outline-variant">
+<div class="flex items-center gap-3">
+<img alt="Foto do Administrador" class="w-10 h-10 rounded-full object-cover" data-alt="A professional headshot of a restaurant manager in a sleek, modern corporate office environment. The lighting is bright and even, reflecting a clean light-mode aesthetic. He wears a charcoal suit and a confident expression. The background is softly blurred with hints of high-end kitchen equipment and minimalist decor in shades of emerald and white." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKmpa4lT8l_kBqOkjGcKruvj89pBzM2vfEiDLwnbT4s0Hy7yheBwx-sR7wY1JNwZO5BECzr3g3XiqdCTvV4Co27f4DBQL2uRDgOn9C3FwvPGOxKqA_Q0whU7yWRBclpJWLm34UZToP54Y4xOAXBAW4IH5ENqBO_UVwUr8tUvclV77eh1DeiQH9pqU6H59tlOU52ZugQ7PPLJDsJWgX4bbz_hj_ljIWi5GrFR2tVRYuFjuZKEtiixlEarL7H3nqP2Tm8W0s12608TE"/>
+<div>
+<p class="font-body-sm font-bold text-on-surface">Admin</p>
+<p class="text-xs text-secondary">Sair</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 right-0 z-40 flex items-center justify-between px-lg bg-surface/80 backdrop-blur-md ml-64 h-16 w-[calc(100%-256px)] border-b border-outline-variant">
+<div class="flex items-center gap-md">
+<h1 class="font-h3 text-h3 font-black text-on-surface">Sabor&amp;Gestão</h1>
+<div class="relative w-96 ml-lg">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-xl text-body-md focus:ring-2 focus:ring-primary" placeholder="Pesquisar pedidos..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="flex items-center gap-2 px-lg py-2 text-secondary font-semibold hover:bg-surface-container-low transition-colors active:opacity-80">
+                Suporte
+            </button>
+<button class="flex items-center gap-2 px-lg py-2 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-opacity active:opacity-80">
+                Novo Pedido
+            </button>
+<div class="flex items-center gap-sm ml-md">
+<button class="p-2 text-secondary hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-secondary hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-64 p-lg max-w-full">
+<header class="mb-lg flex flex-col gap-4">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-h1 text-h1 text-on-surface">Pedidos Atuais</h2>
+<p class="text-secondary font-body-md mt-1">Gerencie a fila de produção em tempo real.</p>
+</div>
+<div class="flex gap-2 p-1 bg-surface-container-low rounded-xl">
+<button class="px-md py-2 bg-white shadow-sm rounded-lg text-primary font-bold text-body-md">Todos</button>
+<button class="px-md py-2 text-secondary hover:bg-white/50 rounded-lg text-body-md font-semibold transition-all">Pendentes</button>
+<button class="px-md py-2 text-secondary hover:bg-white/50 rounded-lg text-body-md font-semibold transition-all">Preparando</button>
+<button class="px-md py-2 text-secondary hover:bg-white/50 rounded-lg text-body-md font-semibold transition-all">Concluídos</button>
+</div>
+</div>
+</header>
+<!-- Bento Stats Grid (Secondary context) -->
+<div class="grid grid-cols-4 gap-gutter mb-lg">
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant flex flex-col gap-2">
+<span class="text-secondary font-label-md uppercase tracking-wider">Fila de Espera</span>
+<span class="font-h2 text-h2 text-primary">12 Pedidos</span>
+<div class="flex items-center gap-1 text-error text-body-sm font-bold">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_up">trending_up</span>
+<span>+20% que ontem</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant flex flex-col gap-2">
+<span class="text-secondary font-label-md uppercase tracking-wider">Tempo Médio</span>
+<span class="font-h2 text-h2 text-on-surface">18 min</span>
+<div class="flex items-center gap-1 text-primary text-body-sm font-bold">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_down">trending_down</span>
+<span>-5 min hoje</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant flex flex-col gap-2">
+<span class="text-secondary font-label-md uppercase tracking-wider">Receita Estimada</span>
+<span class="font-h2 text-h2 text-on-surface">R$ 2.450</span>
+<span class="text-secondary text-body-sm">Faturamento em aberto</span>
+</div>
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant flex flex-col gap-2">
+<span class="text-secondary font-label-md uppercase tracking-wider">Eficiência</span>
+<span class="font-h2 text-h2 text-on-surface">94%</span>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-1">
+<div class="bg-primary w-[94%] h-full rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Orders Table -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-lg py-md font-label-md text-secondary border-b border-outline-variant">ID DO PEDIDO</th>
+<th class="px-lg py-md font-label-md text-secondary border-b border-outline-variant">MESA</th>
+<th class="px-lg py-md font-label-md text-secondary border-b border-outline-variant w-1/3">ITENS</th>
+<th class="px-lg py-md font-label-md text-secondary border-b border-outline-variant">STATUS</th>
+<th class="px-lg py-md font-label-md text-secondary border-b border-outline-variant">TEMPO</th>
+<th class="px-lg py-md font-label-md text-secondary border-b border-outline-variant">TOTAL</th>
+<th class="px-lg py-md font-label-md text-secondary border-b border-outline-variant text-right">AÇÕES</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container/30 transition-colors group">
+<td class="px-lg py-md font-code text-primary font-bold">#1024</td>
+<td class="px-lg py-md font-semibold">Mesa 05</td>
+<td class="px-lg py-md">
+<div class="flex flex-col gap-0.5">
+<span class="text-on-surface">1x Burguer Gourmet Special</span>
+<span class="text-secondary text-xs">1x Coca-Cola Zero Lata</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-3 py-1 rounded-full text-xs font-bold border border-error bg-error/10 text-error flex items-center gap-1 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+                                Pendente
+                            </span>
+</td>
+<td class="px-lg py-md text-secondary">12 min</td>
+<td class="px-lg py-md font-bold">R$ 54,90</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-primary hover:bg-primary-container/10 rounded-lg title='Avançar Status'">
+<span class="material-symbols-outlined" data-icon="play_arrow">play_arrow</span>
+</button>
+<button class="p-2 text-secondary hover:bg-surface-container-high rounded-lg title='Ver Detalhes'">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg title='Cancelar'">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/30 transition-colors group">
+<td class="px-lg py-md font-code text-primary font-bold">#1023</td>
+<td class="px-lg py-md font-semibold">Mesa 02</td>
+<td class="px-lg py-md">
+<div class="flex flex-col gap-0.5">
+<span class="text-on-surface">2x Pizza Calabresa Média</span>
+<span class="text-secondary text-xs">1x Suco de Laranja 500ml</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-3 py-1 rounded-full text-xs font-bold border border-tertiary bg-tertiary/10 text-tertiary flex items-center gap-1 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                Preparando
+                            </span>
+</td>
+<td class="px-lg py-md text-secondary">24 min</td>
+<td class="px-lg py-md font-bold">R$ 112,00</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-primary hover:bg-primary-container/10 rounded-lg">
+<span class="material-symbols-outlined" data-icon="check">check</span>
+</button>
+<button class="p-2 text-secondary hover:bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/30 transition-colors group">
+<td class="px-lg py-md font-code text-primary font-bold">#1022</td>
+<td class="px-lg py-md font-semibold">Delivery #08</td>
+<td class="px-lg py-md">
+<div class="flex flex-col gap-0.5">
+<span class="text-on-surface">1x Combo Casal (Burguers + Fritas)</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-3 py-1 rounded-full text-xs font-bold border border-primary bg-primary/10 text-primary flex items-center gap-1 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                Concluído
+                            </span>
+</td>
+<td class="px-lg py-md text-secondary">42 min</td>
+<td class="px-lg py-md font-bold">R$ 89,90</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-primary hover:bg-primary-container/10 rounded-lg">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+</button>
+<button class="p-2 text-secondary hover:bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/30 transition-colors group">
+<td class="px-lg py-md font-code text-primary font-bold">#1021</td>
+<td class="px-lg py-md font-semibold">Mesa 12</td>
+<td class="px-lg py-md">
+<div class="flex flex-col gap-0.5">
+<span class="text-on-surface">1x Salada Caesar</span>
+<span class="text-secondary text-xs">1x Água Mineral</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-3 py-1 rounded-full text-xs font-bold border border-error bg-error/10 text-error flex items-center gap-1 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+                                Pendente
+                            </span>
+</td>
+<td class="px-lg py-md text-secondary">5 min</td>
+<td class="px-lg py-md font-bold">R$ 38,50</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-primary hover:bg-primary-container/10 rounded-lg">
+<span class="material-symbols-outlined" data-icon="play_arrow">play_arrow</span>
+</button>
+<button class="p-2 text-secondary hover:bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-lg bg-surface-container-low flex justify-between items-center border-t border-outline-variant">
+<p class="text-secondary text-body-sm">Exibindo 4 de 12 pedidos ativos</p>
+<div class="flex gap-2">
+<button class="px-4 py-2 border border-outline-variant rounded-lg font-semibold hover:bg-white transition-colors disabled:opacity-50" disabled="">Anterior</button>
+<button class="px-4 py-2 border border-outline-variant rounded-lg font-semibold hover:bg-white transition-colors">Próximo</button>
+</div>
+</div>
+</div>
+<!-- Order Detail Panel (Hidden by default, shown as "asymmetric layout" element) -->
+<section class="mt-xl grid grid-cols-3 gap-gutter">
+<div class="col-span-2 bg-surface-container-highest p-xl rounded-xl relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-h3 text-h3 text-on-surface mb-2">Painel de Cozinha em Tempo Real</h3>
+<p class="text-on-surface-variant max-w-md">Visualize a carga de trabalho de cada setor. Otimize a distribuição de pedidos e reduza gargalos operacionais durante o pico.</p>
+<button class="mt-md px-lg py-2 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all">Ver Monitor KDS</button>
+</div>
+<div class="absolute right-0 top-0 bottom-0 w-1/3 opacity-20 pointer-events-none bg-gradient-to-l from-primary/40 to-transparent"></div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-[120px] text-primary/10" data-icon="restaurant">restaurant</span>
+</div>
+<div class="bg-primary p-xl rounded-xl text-white flex flex-col justify-between">
+<div>
+<h3 class="font-h3 text-h3 mb-2">Alertas de Atraso</h3>
+<p class="text-primary-fixed text-body-sm">Existem 3 pedidos aguardando há mais de 25 minutos.</p>
+</div>
+<button class="w-full py-3 bg-white text-primary font-black rounded-xl hover:bg-primary-fixed transition-colors active:scale-95">Ver Alertas</button>
+</div>
+</section>
+</main>
+<!-- Contextual FAB for quick actions -->
+<button class="fixed bottom-lg right-lg w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</body></html>

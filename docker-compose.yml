@@ -27,7 +27,13 @@ services:
       DB_NAME: ${DB_NAME:-restaurantes}
       DB_HOST: db
       DB_PORT: 5432
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY}
+      NVIDIA_BASE_URL: ${NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}
+      NVIDIA_MODEL: ${NVIDIA_MODEL:-meta/llama-3.1-8b-instruct}
+      AI_MODULE_API_KEY: ${AI_MODULE_API_KEY}
+      AI_ASR_URL: ${AI_ASR_URL:-http://ai-bridge:8000/asr}
+      AI_TTS_URL: ${AI_TTS_URL:-http://ai-bridge:8000/tts}
+      AI_AUDIO_DIR: ${AI_AUDIO_DIR:-/app/uploads/ai-audio}
     depends_on:
       db:
         condition: service_healthy
@@ -69,6 +75,18 @@ services:
       - "3003:3003"
     depends_on:
       - backend
+
+  ai-bridge:
+    build:
+      context: ./ai-bridge
+    environment:
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY}
+      NVIDIA_ASR_FUNCTION_ID: ${NVIDIA_ASR_FUNCTION_ID:-b702f636-f60c-4a3d-a6f4-f3568c13bd7d}
+      NVIDIA_TTS_FUNCTION_ID: ${NVIDIA_TTS_FUNCTION_ID}
+      NVIDIA_GRPC_TARGET: ${NVIDIA_GRPC_TARGET:-grpc.nvcf.nvidia.com:443}
+      NVIDIA_GRPC_USE_SSL: ${NVIDIA_GRPC_USE_SSL:-true}
+    ports:
+      - "8000:8000"
 
 volumes:
   db_data:

@@ -12,6 +12,7 @@ export interface Theme {
         error: string;
         warning: string;
         overlay: string;
+        headerGradient: string[];
     };
     dark: boolean;
 }
@@ -22,24 +23,25 @@ export const themes: Record<string, Theme> = {
         colors: {
             background: '#020617', // Slate 950
             surface: '#1e293b',    // Slate 800
-            primary: '#2563eb',    // Blue 600
+            primary: '#3b82f6',    // Blue 500
             secondary: '#334155',  // Slate 700
             text: '#f8fafc',       // Slate 50
-            textSecondary: '#cbd5e1', // Slate 300 (Lighter for better contrast)
+            textSecondary: '#cbd5e1', // Slate 300
             border: '#1e293b',
             success: '#10b981',
             error: '#ef4444',
             warning: '#f59e0b',
             overlay: 'rgba(2, 6, 23, 0.98)',
+            headerGradient: ['#0f172a', '#1e293b', '#0f172a'],
         },
         dark: true,
     },
     light: {
-        name: 'Light',
+        name: 'Light (Original)',
         colors: {
             background: '#f8fafc', // Slate 50
             surface: '#ffffff',    // White
-            primary: '#2563eb',    // Blue 600
+            primary: '#4f46e5',    // Indigo 600 (from screenshot)
             secondary: '#e2e8f0',  // Slate 200
             text: '#0f172a',       // Slate 900
             textSecondary: '#64748b', // Slate 500
@@ -48,6 +50,7 @@ export const themes: Record<string, Theme> = {
             error: '#ef4444',
             warning: '#f59e0b',
             overlay: 'rgba(255, 255, 255, 0.95)',
+            headerGradient: ['#991b1b', '#b91c1c', '#dc2626'], // Original Red Header
         },
         dark: false,
     },
@@ -65,6 +68,7 @@ export const themes: Record<string, Theme> = {
             error: '#f87171',
             warning: '#fbbf24',
             overlay: 'rgba(12, 74, 110, 0.95)',
+            headerGradient: ['#082f49', '#0c4a6e', '#075985'],
         },
         dark: true,
     },
@@ -82,6 +86,43 @@ export const themes: Record<string, Theme> = {
             error: '#f87171',
             warning: '#fbbf24',
             overlay: 'rgba(69, 26, 3, 0.95)',
+            headerGradient: ['#78350f', '#92400e', '#b45309'],
+        },
+        dark: true,
+    },
+    forest: {
+        name: 'Forest',
+        colors: {
+            background: '#f0fdf4', // Green 50
+            surface: '#ffffff',    // White
+            primary: '#16a34a',    // Green 600
+            secondary: '#dcfce7',  // Green 100
+            text: '#14532d',       // Green 900
+            textSecondary: '#166534', // Green 800
+            border: '#bbf7d0',
+            success: '#10b981',
+            error: '#ef4444',
+            warning: '#f59e0b',
+            overlay: 'rgba(255, 255, 255, 0.95)',
+            headerGradient: ['#14532d', '#166534', '#15803d'],
+        },
+        dark: false,
+    },
+    luxury: {
+        name: 'Luxury',
+        colors: {
+            background: '#09090b', // Zinc 950
+            surface: '#18181b',    // Zinc 900
+            primary: '#d4af37',    // Gold
+            secondary: '#27272a',  // Zinc 800
+            text: '#fafafa',       // Zinc 50
+            textSecondary: '#a1a1aa', // Zinc 400
+            border: '#27272a',
+            success: '#10b981',
+            error: '#ef4444',
+            warning: '#f59e0b',
+            overlay: 'rgba(9, 9, 11, 0.98)',
+            headerGradient: ['#000000', '#09090b', '#18181b'],
         },
         dark: true,
     },

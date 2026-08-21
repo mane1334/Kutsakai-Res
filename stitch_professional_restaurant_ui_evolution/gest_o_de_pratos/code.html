@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#3f4944",
+                    "error": "#ba1a1a",
+                    "surface": "#f8f9ff",
+                    "surface-tint": "#1b6b51",
+                    "on-secondary-fixed": "#131b2e",
+                    "surface-dim": "#cbdbf5",
+                    "secondary": "#565e74",
+                    "on-surface": "#0b1c30",
+                    "on-primary-container": "#8bd6b7",
+                    "inverse-primary": "#8bd6b6",
+                    "primary": "#004532",
+                    "tertiary-fixed": "#d5e3fd",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "tertiary": "#2f3d51",
+                    "on-tertiary-fixed": "#0d1c2f",
+                    "surface-container-low": "#eff4ff",
+                    "outline": "#6f7973",
+                    "on-primary-fixed-variant": "#00513b",
+                    "outline-variant": "#bec9c2",
+                    "inverse-surface": "#213145",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-tertiary-fixed-variant": "#3a485c",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "secondary-container": "#dae2fd",
+                    "on-background": "#0b1c30",
+                    "on-secondary-container": "#5c647a",
+                    "tertiary-container": "#465469",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-container": "#e5eeff",
+                    "on-primary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed-dim": "#b9c7e0",
+                    "secondary-fixed": "#dae2fd",
+                    "primary-fixed": "#a6f2d1",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#d3e4fe",
+                    "primary-container": "#065f46",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-high": "#dce9ff",
+                    "on-tertiary-container": "#bac8e1",
+                    "primary-fixed-dim": "#8bd6b6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed": "#002116",
+                    "on-secondary": "#ffffff",
+                    "background": "#f8f9ff",
+                    "surface-bright": "#f8f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "lg": "24px",
+                    "gutter": "16px",
+                    "container-max": "1440px"
+            },
+            "fontFamily": {
+                    "code": ["jetbrainsMono"],
+                    "h3": ["Inter"],
+                    "h1-mobile": ["Inter"],
+                    "h1": ["Inter"],
+                    "h2": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "code": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "h3": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "h1-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "h1": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col bg-surface-container-lowest dark:bg-inverse-surface h-screen w-64 border-r border-outline-variant z-50">
+<div class="px-lg py-xl">
+<h2 class="font-h2 text-h2 font-bold text-primary dark:text-primary-fixed-dim">Gestão Pro</h2>
+<p class="font-body-md text-body-md text-secondary">Admin v1.0</p>
+</div>
+<nav class="flex-1 px-md space-y-base">
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">pending_actions</span>
+<span class="font-body-md text-body-md">Pedidos Atuais</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-body-md text-body-md">Histórico</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-semibold active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="font-body-md text-body-md">Gestão de Pratos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">category</span>
+<span class="font-body-md text-body-md">Categorias</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">star</span>
+<span class="font-body-md text-body-md">Avaliações</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">notifications_active</span>
+<span class="font-body-md text-body-md">Chamadas de Garçom</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Configurações</span>
+</a>
+</nav>
+<div class="p-lg mt-auto border-t border-outline-variant">
+<div class="flex items-center gap-md">
+<img alt="Logotipo do Restaurante" class="w-10 h-10 rounded-full bg-primary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWgkU9E64hn46GglOqiNNh_as6Bu2wAik3plf52Nrzr0V9Y81Ynaqxy49psO7kbyknXdT8ZWpTwFxbDDeiDibtsvWhSE9es6EREdSBCzehJ0oITdD_d9meyrGvinmqxWujejlJWJ5vdWKj04AUbnzRRjWgR2r4pjlAomHvrzqhjx8VZqKodG-sjYsWAxaPuAcY2tyMDmD_2l18QT5dxvIu23v2_IVhZ-MKjggKJVbT757e3WtgPX_1tSD0iIxrVYKd_afaiEVCODc"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-bold">Chef Admin</span>
+<span class="text-[10px] text-secondary">Sair da conta</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- Top Navigation -->
+<header class="sticky top-0 right-0 z-40 flex items-center justify-between px-lg bg-surface/80 backdrop-blur-md h-16 w-full border-b border-outline-variant">
+<div class="flex items-center gap-md">
+<h1 class="font-h3 text-h3 font-black text-on-surface">Sabor&amp;Gestão</h1>
+<div class="hidden md:flex items-center bg-surface-container-low px-md py-xs rounded-full border border-outline-variant">
+<span class="material-symbols-outlined text-outline">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md font-body-md w-64" placeholder="Buscar pratos..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="flex items-center gap-xs px-md py-xs bg-primary text-on-primary rounded-lg font-semibold active:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-lg">add</span>
+<span class="font-body-md">Novo Prato</span>
+</button>
+<div class="flex items-center gap-sm border-l border-outline-variant pl-md">
+<span class="material-symbols-outlined text-secondary cursor-pointer hover:bg-surface-container-low p-xs rounded-full">notifications</span>
+<span class="material-symbols-outlined text-secondary cursor-pointer hover:bg-surface-container-low p-xs rounded-full">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<div class="p-lg space-y-lg">
+<!-- Header Section -->
+<div class="flex flex-col gap-xs">
+<h2 class="font-h1 text-h1 text-on-surface">Gestão de Pratos</h2>
+<p class="font-body-lg text-body-lg text-secondary">Visualize, edite e gerencie a disponibilidade do seu cardápio em tempo real.</p>
+</div>
+<!-- Filters & Stats Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl flex items-center gap-md">
+<div class="w-12 h-12 bg-primary-container/20 text-primary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl">restaurant</span>
+</div>
+<div>
+<p class="text-label-md text-secondary">Total de Pratos</p>
+<p class="text-h2 font-bold text-on-surface">42</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl flex items-center gap-md">
+<div class="w-12 h-12 bg-tertiary-container/20 text-tertiary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl">check_circle</span>
+</div>
+<div>
+<p class="text-label-md text-secondary">Ativos</p>
+<p class="text-h2 font-bold text-on-surface">38</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl flex items-center gap-md">
+<div class="w-12 h-12 bg-error-container/20 text-error rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl">block</span>
+</div>
+<div>
+<p class="text-label-md text-secondary">Indisponíveis</p>
+<p class="text-h2 font-bold text-on-surface">04</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl flex items-center gap-md">
+<div class="w-12 h-12 bg-secondary-container/20 text-secondary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl">trending_up</span>
+</div>
+<div>
+<p class="text-label-md text-secondary">Mais Vendidos</p>
+<p class="text-h2 font-bold text-on-surface">12</p>
+</div>
+</div>
+</div>
+<!-- List Controls -->
+<div class="flex flex-wrap items-center justify-between gap-md bg-surface-container-low p-md rounded-xl">
+<div class="flex gap-sm">
+<button class="px-md py-xs bg-on-surface text-surface rounded-full text-label-md font-semibold">Todos</button>
+<button class="px-md py-xs bg-white text-secondary border border-outline-variant rounded-full text-label-md hover:bg-surface-container-high transition-colors">Carnes</button>
+<button class="px-md py-xs bg-white text-secondary border border-outline-variant rounded-full text-label-md hover:bg-surface-container-high transition-colors">Massas</button>
+<button class="px-md py-xs bg-white text-secondary border border-outline-variant rounded-full text-label-md hover:bg-surface-container-high transition-colors">Bebidas</button>
+<button class="px-md py-xs bg-white text-secondary border border-outline-variant rounded-full text-label-md hover:bg-surface-container-high transition-colors">Sobremesas</button>
+</div>
+<div class="flex items-center gap-sm">
+<span class="text-body-sm text-secondary">Ordenar por:</span>
+<select class="bg-white border-outline-variant rounded-lg text-body-md px-md py-xs focus:ring-primary focus:border-primary">
+<option>Nome (A-Z)</option>
+<option>Preço (Menor-Maior)</option>
+<option>Popularidade</option>
+</select>
+</div>
+</div>
+<!-- Dishes Table Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low border-b border-outline-variant">
+<tr>
+<th class="px-lg py-md text-label-md font-bold text-secondary uppercase tracking-wider">Prato</th>
+<th class="px-lg py-md text-label-md font-bold text-secondary uppercase tracking-wider">Categoria</th>
+<th class="px-lg py-md text-label-md font-bold text-secondary uppercase tracking-wider">Preço</th>
+<th class="px-lg py-md text-label-md font-bold text-secondary uppercase tracking-wider">Etiquetas</th>
+<th class="px-lg py-md text-label-md font-bold text-secondary uppercase tracking-wider">Status</th>
+<th class="px-lg py-md text-label-md font-bold text-secondary uppercase tracking-wider text-right">Ações</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Dish Item 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high overflow-hidden border border-outline-variant">
+<img alt="Prato" class="w-full h-full object-cover" data-alt="A professional close-up of a vibrant healthy salad bowl with fresh greens, cherry tomatoes, and grilled protein, presented on a minimalist ceramic plate. The lighting is bright and natural, reflecting a clean and upscale restaurant aesthetic with soft emerald and slate tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmGMWBQBVaSe-3CO0SLKFt8bfDQzTdkScZ-1yfF7mxiuAA5cepbTbeE6xUfPOgqnUrxOj5SNqcqalA4UpouX-CjzfIEI53iQRFviGC6Ni3vNIrMZvcVXP1_lnFxEzKFYSw7AfHh0XA8lVxa1E3WDsG8hyaoA07I0etMB566Ar9U_-gyPP4bNr6pJX5ZvMjnbcsyZcc5WEyn6qQWHOEfD-kf70EB2qsHoGMWj0eDZ1ah-HClbz8uLRGmJYmrsIZ7G7yBQYGI7cf9D0"/>
+</div>
+<span class="font-body-md font-bold text-on-surface">Salada Mediterrânea</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-sm py-1 bg-secondary-container/30 text-secondary text-xs font-semibold rounded-full">Saudável</span>
+</td>
+<td class="px-lg py-md font-code text-on-surface">R$ 42,90</td>
+<td class="px-lg py-md">
+<div class="flex gap-xs">
+<span class="px-2 py-0.5 border border-primary text-primary text-[10px] font-bold rounded uppercase">Vegetariano</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+<span class="ms-3 text-xs font-medium text-primary">Disponível</span>
+</label>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-xs hover:bg-surface-container-high rounded text-secondary"><span class="material-symbols-outlined">edit</span></button>
+<button class="p-xs hover:bg-error-container/20 rounded text-error"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</td>
+</tr>
+<!-- Dish Item 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high overflow-hidden border border-outline-variant">
+<img alt="Prato" class="w-full h-full object-cover" data-alt="A gourmet artisan cheeseburger with melted cheddar, crisp lettuce, and a glossy brioche bun, placed on a slate board. The visual style is premium corporate dining, using high-contrast lighting to highlight the rich textures of the food, set against a dark, professional kitchen background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBATZynRpjhQyNMwbijkm06Ft7pZWn3Jq59CODO13Zg4hLHYv7imfI87m9QHMsEfyVFxQQ4DYQRuh728vgmIkTQKlVz4vl1pqJ4c5Kz3F01dlFyXsXuEcTlF_5nehUxNeNGnhhvvGagGeHVJBJ4Tu2O_2vAP1P_yv_h3WmwZovVLDAyQbFd8xlVoVj7oR-SFck2hIqdte1BxUZd3GjietD6RQmk3uhXqXRswqVDXozxpABP5kfVt6GUHi6-qrG5Dz-_Xi-1E7sPlZ0"/>
+</div>
+<span class="font-body-md font-bold text-on-surface">Burger Artesanal X-Pimenta</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-sm py-1 bg-secondary-container/30 text-secondary text-xs font-semibold rounded-full">Burgers</span>
+</td>
+<td class="px-lg py-md font-code text-on-surface">R$ 38,00</td>
+<td class="px-lg py-md">
+<div class="flex gap-xs">
+<span class="px-2 py-0.5 border border-error text-error text-[10px] font-bold rounded uppercase">Picante</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+<span class="ms-3 text-xs font-medium text-primary">Disponível</span>
+</label>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-xs hover:bg-surface-container-high rounded text-secondary"><span class="material-symbols-outlined">edit</span></button>
+<button class="p-xs hover:bg-error-container/20 rounded text-error"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</td>
+</tr>
+<!-- Dish Item 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high overflow-hidden border border-outline-variant">
+<img alt="Prato" class="w-full h-full object-cover" data-alt="An elegant plate of fresh fettuccine pasta topped with a rich tomato pomodoro sauce and a sprig of basil. The photography uses shallow depth of field to emphasize the culinary craftsmanship, with warm, inviting lighting consistent with a high-end Italian bistro atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFPtHCYr8x1TGzwGgvDSMh4g_8ZMx-lkFUZjsSPAjuHpRqTCAmUsF6hXxJOVtCy1tbEz6lzLzJoqFIRGRT6f3C-X7gPPbHK4mJYBT-vSDw6BmOrjDOtexN4UMVtlhkoThTi72qsqkCmLYoTz2M5FlIvdavom6QjuKWV4cPZL6sZcXNVpX2HDkvzrZITyJGa-Hz7Q3mj5fSCMbZ3-abxN0wUlMUxQTs35tBRVmi2-wB_9OFLOAg2Y_Y6fUcZbeeZF0bJV3JYrs-JDM"/>
+</div>
+<span class="font-body-md font-bold text-on-surface">Pasta al Pomodoro</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-sm py-1 bg-secondary-container/30 text-secondary text-xs font-semibold rounded-full">Massas</span>
+</td>
+<td class="px-lg py-md font-code text-on-surface">R$ 54,50</td>
+<td class="px-lg py-md">
+<div class="flex gap-xs">
+<span class="px-2 py-0.5 border border-primary text-primary text-[10px] font-bold rounded uppercase">Vegetariano</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+<span class="ms-3 text-xs font-medium text-error">Indisponível</span>
+</label>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-xs hover:bg-surface-container-high rounded text-secondary"><span class="material-symbols-outlined">edit</span></button>
+<button class="p-xs hover:bg-error-container/20 rounded text-error"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-lg py-md bg-surface-container-low border-t border-outline-variant">
+<span class="text-body-sm text-secondary">Mostrando 1-10 de 42 pratos</span>
+<div class="flex gap-xs">
+<button class="p-xs border border-outline-variant rounded hover:bg-white disabled:opacity-50"><span class="material-symbols-outlined">chevron_left</span></button>
+<button class="px-sm py-xs bg-primary text-on-primary rounded text-label-md">1</button>
+<button class="px-sm py-xs border border-outline-variant rounded hover:bg-white text-label-md">2</button>
+<button class="px-sm py-xs border border-outline-variant rounded hover:bg-white text-label-md">3</button>
+<button class="p-xs border border-outline-variant rounded hover:bg-white"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface-container-lowest dark:bg-inverse-surface shadow-lg rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md">Cardápio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim bg-primary-container/20 rounded-xl px-4 py-1" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-md text-label-md">Pedidos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-label-md text-label-md">Carrinho</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Perfil</span>
+</a>
+</nav>
+</body></html>

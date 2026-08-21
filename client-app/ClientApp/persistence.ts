@@ -1,12 +1,14 @@
-
 import RNFS from 'react-native-fs';
+import Config from 'react-native-config';
 
 const FILE_PATH = `${RNFS.DocumentDirectoryPath}/app_state.json`;
 
 export interface AppState {
     currentOrder: any | null;
     serverIp: string;
+    vpsIp?: string;
     tableNumber: string;
+    restaurantId?: string;
     currentTheme: string;
     currentLanguage: string;
 }
@@ -17,7 +19,7 @@ export const saveState = async (state: Partial<AppState>) => {
         const newState = { ...existing, ...state };
         await RNFS.writeFile(FILE_PATH, JSON.stringify(newState), 'utf8');
     } catch (e) {
-        console.error("Failed to save state", e);
+        if (__DEV__) console.error("Failed to save state", e);
     }
 }
 
@@ -28,12 +30,14 @@ export const loadState = async (): Promise<AppState> => {
             return JSON.parse(content);
         }
     } catch (e) {
-        console.error("Failed to load state", e);
+        if (__DEV__) console.error("Failed to load state", e);
     }
     return {
         currentOrder: null,
         serverIp: '10.0.2.2',
-        tableNumber: '1',
+        vpsIp: '',
+        tableNumber: Config.TABLE_NUMBER || '1',
+        restaurantId: '1',
         currentTheme: 'dark',
         currentLanguage: 'pt'
     };

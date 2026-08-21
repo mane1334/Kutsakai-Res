@@ -1,6 +1,10 @@
 import { useState, useCallback } from 'react';
 import { Dish, CartItem } from '../types';
 
+interface UseCartProps {
+    onItemAdded?: (name: string, quantity: number) => void;
+}
+
 interface UseCartReturn {
     cart: CartItem[];
     addToCart: (dish: Dish, quantity?: number) => void;
@@ -11,7 +15,7 @@ interface UseCartReturn {
     itemCount: number;
 }
 
-export const useCart = (): UseCartReturn => {
+export const useCart = (props?: UseCartProps): UseCartReturn => {
     const [cart, setCart] = useState<CartItem[]>([]);
 
     const addToCart = useCallback((dish: Dish, quantity: number = 1) => {
@@ -26,7 +30,8 @@ export const useCart = (): UseCartReturn => {
             }
             return [...prev, { ...dish, quantity }];
         });
-    }, []);
+        props?.onItemAdded?.(dish.name, quantity);
+    }, [props]);
 
     const removeFromCart = useCallback((id: number) => {
         setCart(prev => prev.filter(item => item.id !== id));

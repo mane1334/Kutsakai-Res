@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
-import { getAds } from '../services/api';
 import { toast } from 'react-toastify';
-import { resolveImageUrl, PLACEHOLDER_IMG } from '../utils/images';
+import { getAds } from '../services/api';
+import { PLACEHOLDER_IMG, resolveImageUrl } from '../utils/images';
 
 const Footer = () => {
   const [ads, setAds] = useState([]);
@@ -14,94 +13,83 @@ const Footer = () => {
     const fetchAds = async () => {
       try {
         const data = await getAds();
-        // Filter active ads and sort by updated_at (newest first)
-        const activeAds = data.filter(ad => ad.is_active).sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+        const activeAds = Array.isArray(data)
+          ? data.filter((ad) => ad.is_active).sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0))
+          : [];
         setAds(activeAds);
-      } catch (e) {
-        setError(e.message);
+      } catch (err) {
+        setError(err.message);
         toast.error('Erro ao carregar anúncios.');
       } finally {
         setLoading(false);
       }
     };
+
     fetchAds();
   }, []);
 
   useEffect(() => {
-    if (ads.length > 1) {
-      const interval = setInterval(() => {
-        setCurrentAdIndex(prevIndex => (prevIndex + 1) % ads.length);
-      }, 10000); // Change ad every 10 seconds
-      return () => clearInterval(interval);
-    }
-  }, [ads]);
+    if (ads.length <= 1) return undefined;
+    const interval = setInterval(() => {
+      setCurrentAdIndex((prevIndex) => (prevIndex + 1) % ads.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [ads.length]);
 
-  if (loading) return (
-    <footer className="bg-gray-800 text-white p-4 text-center mt-8">
-      <p>Carregando anúncios...</p>
-    </footer>
-  );
+  if (loading) {
+    return (
+      <footer className="mt-10 bg-gray-950 px-4 py-8 text-center text-white">
+        <p>Carregando anúncios...</p>
+      </footer>
+    );
+  }
 
-  if (error) return (
-    <footer className="bg-gray-800 text-white p-4 text-center mt-8">
-      <p className="text-red-400">Erro ao carregar anúncios: {error}</p>
-    </footer>
-  );
-
-  if (ads.length === 0) return (
-    <footer className="bg-gradient-to-t from-gray-900 to-gray-800 text-white p-8 text-center mt-12">
-      <div className="container mx-auto">
-        <div className="border-t border-gray-700 pt-8">
-          <p className="text-gray-400 mb-4">🍽️ Obrigado por escolher nosso restaurante!</p>
-          <p className="text-sm text-gray-500">Sistema de Pedidos Digital - Interactive Restaurant</p>
-        </div>
-      </div>
-    </footer>
-  );
+  if (error) {
+    return (
+      <footer className="mt-10 bg-gray-950 px-4 py-8 text-center text-white">
+        <p className="text-red-300">Erro ao carregar anúncios: {error}</p>
+      </footer>
+    );
+  }
 
   const currentAd = ads[currentAdIndex];
 
   return (
-    <footer className="bg-gradient-to-t from-gray-900 to-gray-800 text-white p-8 text-center mt-12">
-      <div className="container mx-auto">
-        {/* Ad Section */}
-        <div className="mb-8 p-6 bg-gradient-to-r from-red-800 to-red-700 rounded-xl shadow-xl">
-          {(
+    <footer className="mt-10 bg-gray-950 px-4 py-8 text-center text-white">
+      <div className="container mx-auto max-w-7xl">
+        {currentAd ? (
+          <div className="mb-8 rounded-2xl bg-gradient-to-r from-red-800 to-red-700 p-5 shadow-xl md:p-6">
             <div className="mb-4">
-              <img 
-                src={currentAd.image_url ? resolveImageUrl(currentAd.image_url) : PLACEHOLDER_IMG} 
-                alt={currentAd.title} 
-                className="mx-auto rounded-lg shadow-lg max-h-48 object-contain"
+              <img
+                src={currentAd.image_url ? resolveImageUrl(currentAd.image_url) : PLACEHOLDER_IMG}
+                alt={currentAd.title}
+                className="mx-auto max-h-48 rounded-lg object-contain shadow-lg"
                 crossOrigin="anonymous"
                 referrerPolicy="no-referrer"
-                onError={(e) => {
-                  e.currentTarget.src = PLACEHOLDER_IMG;
+                onError={(event) => {
+                  event.currentTarget.src = PLACEHOLDER_IMG;
                 }}
               />
             </div>
-          )}
-          <h3 className="text-2xl font-bold mb-2 text-white">{currentAd.title}</h3>
-          <p className="text-red-100 mb-4">{currentAd.content}</p>
-          <p className="text-xs text-red-200 opacity-75">Publicidade</p>
-          
-          {/* Ad navigation dots */}
-          {ads.length > 1 && (
-            <div className="flex justify-center space-x-2 mt-4">
-              {ads.map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-                    index === currentAdIndex ? 'bg-white' : 'bg-white opacity-50'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {/* Footer Info */}
-        <div className="border-t border-gray-700 pt-8">
-          <p className="text-gray-400 mb-4">🍽️ Obrigado por escolher nosso restaurante!</p>
+            <h3 className="mb-2 text-2xl font-bold text-white">{currentAd.title}</h3>
+            <p className="mb-4 text-red-100">{currentAd.content}</p>
+            <p className="text-xs text-red-200 opacity-75">Publicidade</p>
+
+            {ads.length > 1 ? (
+              <div className="mt-4 flex justify-center gap-2">
+                {ads.map((ad, index) => (
+                  <span
+                    key={ad.id || index}
+                    className={`h-2 w-2 rounded-full transition-colors duration-300 ${index === currentAdIndex ? 'bg-white' : 'bg-white/50'}`}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="border-t border-gray-800 pt-6">
+          <p className="mb-3 text-gray-300">Obrigado por escolher nosso restaurante!</p>
           <p className="text-sm text-gray-500">Sistema de Pedidos Digital - Interactive Restaurant</p>
         </div>
       </div>

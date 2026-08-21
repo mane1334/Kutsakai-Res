@@ -1,42 +1,41 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { resolveImageUrl, PLACEHOLDER_IMG } from '../utils/images';
+import React, { useEffect, useMemo, useState } from 'react';
 import { formatMeticalDisplay } from '../utils/currency';
+import { PLACEHOLDER_IMG, resolveImageUrl } from '../utils/images';
 
 const SortIcon = ({ active, dir }) => (
-  <svg className={`w-3 h-3 ml-1 inline ${active ? 'text-gray-700' : 'text-gray-400'}`} viewBox="0 0 20 20" fill="currentColor">
-    {dir === 'asc' ? (
-      <path d="M3 12l7-8 7 8H3z" />
-    ) : (
-      <path d="M17 8l-7 8-7-8h14z" />
-    )}
+  <svg className={`ml-1 inline h-3 w-3 ${active ? 'text-slate-700' : 'text-slate-400'}`} viewBox="0 0 20 20" fill="currentColor">
+    {dir === 'asc' ? <path d="M3 12l7-8 7 8H3z" /> : <path d="M17 8l-7 8-7-8h14z" />}
   </svg>
 );
 
 const DishTable = ({ dishes, onEdit, onDelete }) => {
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState('name');
-  const [sortDir, setSortDir] = useState('asc'); // 'asc' | 'desc'
+  const [sortDir, setSortDir] = useState('asc');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  useEffect(() => { setPage(1); }, [query, dishes]);
   useEffect(() => {
-    // Ajusta página se reduzir pageSize e a página atual ficar fora do range
-    setPage(p => Math.max(1, Math.min(p, Math.ceil((filtered.length || 1) / pageSize))));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageSize]);
+    setPage(1);
+  }, [query, dishes]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return dishes;
-    return dishes.filter(d => (d.name || '').toLowerCase().includes(q));
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return dishes;
+    return dishes.filter((dish) => (dish.name || '').toLowerCase().includes(normalizedQuery));
   }, [dishes, query]);
+
+  useEffect(() => {
+    setPage((current) => Math.max(1, Math.min(current, Math.ceil((filtered.length || 1) / pageSize))));
+  }, [filtered.length, pageSize]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
     const dirMul = sortDir === 'asc' ? 1 : -1;
     arr.sort((a, b) => {
-      let va, vb;
+      let va;
+      let vb;
+
       switch (sortKey) {
         case 'price':
           va = parseFloat(a.price || 0);
@@ -51,12 +50,13 @@ const DishTable = ({ dishes, onEdit, onDelete }) => {
           va = (a.name || '').toLowerCase();
           vb = (b.name || '').toLowerCase();
       }
+
       if (va < vb) return -1 * dirMul;
       if (va > vb) return 1 * dirMul;
       return 0;
     });
     return arr;
-  }, [filtered, sortKey, sortDir]);
+  }, [filtered, sortDir, sortKey]);
 
   const total = sorted.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -67,7 +67,7 @@ const DishTable = ({ dishes, onEdit, onDelete }) => {
 
   const requestSort = (key) => {
     if (sortKey === key) {
-      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+      setSortDir((current) => (current === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortKey(key);
       setSortDir('asc');
@@ -75,111 +75,151 @@ const DishTable = ({ dishes, onEdit, onDelete }) => {
   };
 
   const renderHeader = (label, key, align = 'left') => (
-    <th className={`py-2 px-4 border-b ${align === 'right' ? 'text-right' : 'text-left'}`}>
-      <button onClick={() => requestSort(key)} className="flex items-center select-none">
+    <th className={`px-4 py-3 ${align === 'right' ? 'text-right' : 'text-left'}`}>
+      <button onClick={() => requestSort(key)} className="flex items-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
         <span>{label}</span>
         <SortIcon active={sortKey === key} dir={sortKey === key ? sortDir : 'asc'} />
       </button>
     </th>
   );
 
+  const getGalleryCount = (dish) => {
+    if (Array.isArray(dish.image_urls)) return dish.image_urls.length;
+    if (typeof dish.image_urls !== 'string' || !dish.image_urls.trim()) return dish.image_url ? 1 : 0;
+    try {
+      const parsed = JSON.parse(dish.image_urls);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean).length;
+    } catch (_) { }
+    return dish.image_urls.split('\n').filter(Boolean).length;
+  };
+
   if (!dishes || dishes.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-md">
-        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-        </svg>
-        <p className="text-gray-500">Nenhum prato cadastrado ainda.</p>
+      <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-center text-sm text-slate-500">
+        Nenhum prato cadastrado ainda.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <div className="flex items-center justify-between mb-3 gap-3">
-        <div className="text-sm text-gray-500">Total: {dishes.length}</div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-600">Por página</label>
-          <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="p-2 border rounded">
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="text-sm text-slate-500">Total de pratos: {dishes.length}</div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <select
+            value={pageSize}
+            onChange={(event) => setPageSize(Number(event.target.value))}
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none shadow-sm"
+          >
+            <option value={5}>5 por pagina</option>
+            <option value={10}>10 por pagina</option>
+            <option value={20}>20 por pagina</option>
+            <option value={50}>50 por pagina</option>
           </select>
+
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(event) => setQuery(event.target.value)}
             placeholder="Pesquisar prato..."
-            className="w-full max-w-xs p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 sm:min-w-[280px]"
           />
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-md">
-          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <p className="text-gray-500">Nenhum prato corresponde à pesquisa.</p>
+        <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-center text-sm text-slate-500">
+          Nenhum prato corresponde a pesquisa.
         </div>
       ) : (
         <>
-          <table className="min-w-full bg-white">
-            <thead>
-              <tr className="text-left">
-                <th className="py-2 px-4 border-b">Imagem</th>
-                {renderHeader('Nome', 'name')}
-                {renderHeader('Preço', 'price')}
-                {renderHeader('Disponível', 'is_available')}
-                <th className="py-2 px-4 border-b">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pageItems.map(dish => (
-                <tr key={dish.id} className="hover:bg-gray-50">
-                  <td className="py-2 px-4 border-b">
-                    <div className="h-12 w-12 overflow-hidden rounded group">
-                      <img
-                        src={dish.image_url ? resolveImageUrl(dish.image_url) : PLACEHOLDER_IMG}
-                        alt={dish.name}
-                        className="h-12 w-12 object-cover transition-transform duration-200 group-hover:scale-110"
-                        onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMG; }}
-                      />
-                    </div>
-                  </td>
-                  <td className="py-2 px-4 border-b font-medium text-gray-800">
-                    <div className="max-w-[240px] truncate" title={dish.name}>{dish.name}</div>
-                  </td>
-                  <td className="py-2 px-4 border-b text-gray-700 font-mono">{formatMeticalDisplay(dish.price)}</td>
-                  <td className="py-2 px-4 border-b">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${dish.is_available ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`}>
-                      {dish.is_available ? 'Sim' : 'Não'}
-                    </span>
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    <button onClick={() => onEdit(dish)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mr-2">Editar</button>
-                    <button onClick={() => onDelete(dish.id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Deletar</button>
-                  </td>
+          <div className="overflow-x-auto rounded-3xl border border-slate-200">
+            <table className="min-w-full bg-white">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Imagem</th>
+                  {renderHeader('Nome', 'name')}
+                  {renderHeader('Preco', 'price')}
+                  {renderHeader('Disponivel', 'is_available')}
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Acoes</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="flex items-center justify-between mt-3 text-sm text-gray-600">
+              </thead>
+              <tbody>
+                {pageItems.map((dish) => (
+                  <tr key={dish.id} className="border-t border-slate-200 hover:bg-slate-50/70">
+                    <td className="px-4 py-4">
+                      <div className="group h-14 w-14 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                        <img
+                          src={dish.image_url ? resolveImageUrl(dish.image_url) : PLACEHOLDER_IMG}
+                          alt={dish.name}
+                          className="h-14 w-14 object-cover transition-transform duration-200 group-hover:scale-110"
+                          onError={(event) => {
+                            event.currentTarget.src = PLACEHOLDER_IMG;
+                          }}
+                        />
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-sm font-medium text-slate-900">
+                      <div className="max-w-[240px] truncate" title={dish.name}>
+                        {dish.name}
+                      </div>
+                      <div className="mt-1 text-xs font-medium text-slate-500">
+                        {getGalleryCount(dish)} foto(s)
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-sm font-semibold text-slate-700">{formatMeticalDisplay(dish.price)}</td>
+                    <td className="px-4 py-4">
+                      <span
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                          dish.is_available
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                            : 'border-slate-200 bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {dish.is_available ? 'Sim' : 'Nao'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => onEdit(dish)}
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => onDelete(dish.id)}
+                          className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-100"
+                        >
+                          Deletar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              Mostrando {total === 0 ? 0 : startIdx + 1}–{endIdx} de {total}
+              Mostrando {total === 0 ? 0 : startIdx + 1}-{endIdx} de {total}
             </div>
-            <div className="space-x-2">
-              <button 
-                className="px-3 py-1 border rounded disabled:opacity-50" 
-                onClick={() => setPage(p => Math.max(1, p - 1))} 
+            <div className="flex items-center gap-2">
+              <button
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={currentPage <= 1}
-              >Anterior</button>
-              <span>Página {currentPage} de {totalPages}</span>
-              <button 
-                className="px-3 py-1 border rounded disabled:opacity-50" 
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+              >
+                Anterior
+              </button>
+              <span>Pagina {currentPage} de {totalPages}</span>
+              <button
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                 disabled={currentPage >= totalPages}
-              >Seguinte</button>
+              >
+                Seguinte
+              </button>
             </div>
           </div>
         </>

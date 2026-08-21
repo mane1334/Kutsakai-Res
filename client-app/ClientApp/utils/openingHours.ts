@@ -18,7 +18,7 @@ export const isRestaurantOpen = (openTime?: string, closeTime?: string): boolean
 
         return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
     } catch (e) {
-        console.error("Error parsing opening hours", e);
+        if (__DEV__) console.error("Error parsing opening hours", e);
         return true;
     }
 };
